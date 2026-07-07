@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Superclash Planner - Version 20</title>
+<title>Superclash Planner - Version 24</title>
 <style>
   :root {
     --bg:#080b12; --bg2:#0d1320; --card:#131a2a; --card2:#171f31; --line:rgba(148,163,184,.18);
@@ -60,7 +60,7 @@
   details{border-radius:15px;margin:8px 0;background:rgba(17,24,39,.50)}summary{padding:12px 13px}.details-body{padding:0 13px 13px}.calc-help{display:grid;gap:8px;margin:10px 0}.calc-box{border:1px solid var(--line);background:rgba(8,13,24,.48);border-radius:14px;padding:12px}.calc-box h3{font-size:14px;margin-bottom:4px}.calc-box p{color:var(--muted);font-size:12px;line-height:1.45}.timer-list{display:grid;gap:8px;margin-top:8px}.timer-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:8px;color:var(--muted);font-size:12px}.timer-row b{color:var(--text)}
   .equip-grid,.source-grid{gap:9px}.equip-card,.source-card{border-radius:14px;padding:11px}.ore-fields input{padding:8px 6px}.cost-row{font-size:12px}
 
-  .guide-list{display:grid;gap:10px;margin-top:12px}.guide-card{border:1px solid var(--line);background:rgba(8,13,24,.46);border-radius:15px;padding:12px;display:grid;gap:8px}.guide-card-head{display:flex;justify-content:space-between;gap:10px;align-items:start}.guide-title{font-weight:950}.guide-type{color:var(--muted);font-size:12px}.guide-text{color:var(--muted);font-size:13px;white-space:pre-wrap;max-height:160px;overflow:auto;border-top:1px solid var(--line);padding-top:8px}.ai-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.ai-output{white-space:pre-wrap;line-height:1.55;color:#dbeafe;background:rgba(8,13,24,.64);border:1px solid var(--line);border-radius:15px;padding:14px;min-height:140px}.ai-output.empty{color:var(--muted)}.grounding-box{margin-top:10px;border:1px solid rgba(96,165,250,.28);background:rgba(37,99,235,.08);border-radius:14px;padding:12px;color:#bfdbfe;font-size:12px;line-height:1.45}.grounding-box a{color:#93c5fd}.grounding-box .title{font-weight:950;color:#dbeafe;margin-bottom:6px}.textarea-small{min-height:120px}.guide-compose{display:grid;gap:10px}.guide-meta-grid{display:grid;grid-template-columns:1fr 180px;gap:10px}@media(max-width:640px){.guide-meta-grid{grid-template-columns:1fr}.ai-actions .btn{flex:1}}
+  .guide-list{display:grid;gap:10px;margin-top:12px}.guide-card{border:1px solid var(--line);background:rgba(8,13,24,.46);border-radius:15px;padding:12px;display:grid;gap:8px}.guide-card-head{display:flex;justify-content:space-between;gap:10px;align-items:start}.guide-title{font-weight:950}.guide-type{color:var(--muted);font-size:12px}.guide-text{color:var(--muted);font-size:13px;white-space:pre-wrap;max-height:160px;overflow:auto;border-top:1px solid var(--line);padding-top:8px}.ai-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.ai-output{white-space:pre-wrap;line-height:1.55;color:#dbeafe;background:rgba(8,13,24,.64);border:1px solid var(--line);border-radius:15px;padding:14px;min-height:140px}.ai-output.empty{color:var(--muted)}.grounding-box{margin-top:10px;border:1px solid rgba(96,165,250,.28);background:rgba(37,99,235,.08);border-radius:14px;padding:12px;color:#bfdbfe;font-size:12px;line-height:1.45}.grounding-box a{color:#93c5fd}.grounding-box .title{font-weight:950;color:#dbeafe;margin-bottom:6px}.textarea-small{min-height:120px}.chat-box{display:grid;gap:10px}.chat-thread{display:grid;gap:10px;max-height:420px;overflow:auto;padding:6px;border:1px solid var(--line);border-radius:15px;background:rgba(8,13,24,.42)}.chat-msg{border:1px solid var(--line);border-radius:15px;padding:11px 12px;white-space:pre-wrap;line-height:1.5}.chat-msg.user{margin-left:28px;background:rgba(139,92,246,.16);border-color:rgba(139,92,246,.35)}.chat-msg.ai{margin-right:28px;background:rgba(15,23,42,.72)}.chat-name{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:950;margin-bottom:5px}.chat-input-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}@media(max-width:640px){.chat-input-row{grid-template-columns:1fr}.chat-input-row .btn{width:100%}}.guide-compose{display:grid;gap:10px}.guide-meta-grid{display:grid;grid-template-columns:1fr 180px;gap:10px}@media(max-width:640px){.guide-meta-grid{grid-template-columns:1fr}.ai-actions .btn{flex:1}}
   .strategy-preview{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.45;border:1px solid var(--line);background:rgba(8,13,24,.46);border-radius:14px;padding:12px}
   @media(max-width:520px){.wrap{padding-left:12px;padding-right:12px}.topline{align-items:flex-start}.sub{display:none}.tabs{position:sticky}.auth-actions{width:100%}.auth-actions .btn{flex:1}.stat-grid{grid-template-columns:1fr}.item{grid-template-columns:auto 1fr}.item .pill{justify-self:start}.source-grid,.equip-grid{grid-template-columns:1fr}}
 
@@ -68,7 +68,7 @@
 </head>
 <body>
 <div class="wrap">
-  <header class="hero"><div class="topline"><div class="brand"><div class="logo">SC</div><div><h1>Superclash Planner</h1><p class="sub">A clean upgrade dashboard for village progress, manual equipment, ores, AI plans, cloud save, and supercharges.</p></div></div><div class="version">v21 broader AI sources</div></div></header>
+  <header class="hero"><div class="topline"><div class="brand"><div class="logo">SC</div><div><h1>Superclash Planner</h1><p class="sub">A clean upgrade dashboard for village progress, manual equipment, ores, AI plans, cloud save, and supercharges.</p></div></div><div class="version">v24 AI chat plan</div></div></header>
   <section class="card soft auth-card" id="authPanel">
     <div class="auth-left">
       <div class="auth-title"><span class="auth-dot" id="authDot"></span><span id="authTitle">Not signed in</span></div>
@@ -81,7 +81,7 @@
       <button class="btn secondary" id="signOutBtn" type="button" style="display:none">Sign out</button>
     </div>
   </section>
-  <nav class="tabs" aria-label="Planner tabs"><button class="tab active" data-panel="village">Village</button><button class="tab" data-panel="equipment">Equipment + ores</button><button class="tab" data-panel="guides">Guides</button><button class="tab" data-panel="ai">AI Plan</button><button class="tab" data-panel="supercharges">Supercharges</button></nav>
+  <nav class="tabs" aria-label="Planner tabs"><button class="tab active" data-panel="village">Village</button><button class="tab" data-panel="equipment">Equipment + ores</button><button class="tab" data-panel="ai">AI Plan</button><button class="tab" data-panel="supercharges">Supercharges</button></nav>
   <section class="panel active" id="panel-village">
     <details class="card import-card" open>
       <summary>Village export <span class="mini">Paste JSON, then analyze</span></summary>
@@ -100,15 +100,59 @@
         <div class="stat"><div class="label">Active timers</div><div class="value" id="runningValue">0</div><div class="hint">Detected timer fields</div></div>
       </div>
       <div id="calcExplainer"></div>
-      <div class="card compact-card"><div class="section-title">Upgrade focus</div><p class="section-sub">Top priorities only. Full category lists are collapsed underneath.</p><div id="queueList" class="queue compact-queue"></div></div>
       <div id="categoryList"></div>
     </div>
   </section>
   <section class="panel" id="panel-equipment"><div class="card"><div class="section-title">Manual equipment levels</div><p class="section-sub">Type your current level for each equipment. Use <b>0</b> or leave blank for gear you do not own or do not want counted.</p><div class="row"><button class="btn secondary" id="clearGearBtn">Clear all equipment levels</button></div><div id="equipmentManualList"></div></div><div class="card"><div class="section-title">Current ores</div><p class="section-sub">Type how much ore you have right now. These save automatically on this browser.</p><div class="grid three"><label>Shiny Ore<input type="number" min="0" step="1" id="oreShiny" placeholder="type amount"></label><label>Glowy Ore<input type="number" min="0" step="1" id="oreGlowy" placeholder="type amount"></label><label>Starry Ore<input type="number" min="0" step="1" id="oreStarry" placeholder="type amount"></label></div></div><div class="card"><div class="section-title">Ore tracker sources</div><p class="section-sub">Monthly gain cards like Clashify. Edit the totals for each source and turn off anything you do not use.</p><div class="grid two"><label>Goal<select id="oreGoal"><option value="max">Max all entered equipment</option><option value="minimum">Recommended minimums first</option></select></label><div class="row" style="align-items:end"><button class="btn secondary" id="resetOreSourcesBtn" type="button">Reset source values</button></div></div><div id="oreSourceGrid" class="source-grid"></div></div><div class="card"><div class="section-title">Finish estimate</div><p class="section-sub">Uses your current ore balance, the source cards above, and the manual equipment levels.</p><div id="orePlannerResults"></div></div></section>
-  <section class="panel" id="panel-guides"><div class="card"><div class="section-title">Saved guides</div><p class="section-sub">Paste your upgrade, equipment, ore, or supercharge guides here. The AI Plan tab will treat these as the main source of truth.</p><div class="guide-compose"><div class="guide-meta-grid"><label>Guide title<input id="guideTitle" placeholder="Example: TH18 upgrade priority"></label><label>Guide type<select id="guideType"><option value="Upgrade guide">Upgrade guide</option><option value="Equipment guide">Equipment guide</option><option value="Ore guide">Ore guide</option><option value="Supercharge guide">Supercharge guide</option><option value="Strategy guide">Strategy guide</option><option value="My strategy notes">My strategy notes</option></select></label></div><label>Guide text<textarea id="guideText" class="textarea-small" placeholder="Paste the guide or your notes here"></textarea></label><div class="row"><button class="btn" id="saveGuideBtn" type="button">Save guide</button><button class="btn secondary" id="clearGuideFormBtn" type="button">Clear form</button></div></div><div id="guideList" class="guide-list"></div></div></section>
-  <section class="panel" id="panel-ai"><div class="card"><div class="section-title">AI Plan</div><p class="section-sub">Pick your playstyle, then generate a short plan. Saved guides are optional; the AI uses them first, then trusted sources plus broader community/meta sources like YouTube when helpful.</p><div class="grid two"><label>Strategy<select id="strategySelect"><option value="balanced">Balanced progress</option><option value="rush">Strategic rushing</option><option value="max">Max everything before moving on</option><option value="war">War performance</option><option value="farming">Farming / fast loot</option></select></label><label>Plan length<select id="planLengthSelect"><option value="short">Short and direct</option><option value="detailed">A little more detail</option></select></label></div><div id="strategyPreview" class="strategy-preview"></div><div class="ai-actions"><button class="btn" id="generateAiPlanBtn" type="button">Generate plan</button><button class="btn secondary" id="clearAiPlanBtn" type="button">Clear plan</button></div><div id="aiStatus" class="notice" style="display:none"></div></div><div class="card"><div class="section-title">Plan output</div><div id="aiOutput" class="ai-output empty">Choose a strategy, enter your equipment/ores, optionally save guides, then click Generate plan.</div></div></section>
+  <section class="panel" id="panel-ai">
+    <div class="card">
+      <div class="section-title">AI Plan</div>
+      <p class="section-sub">Pick a strategy and generate a plan. It uses your village data, manual equipment levels, ores, supercharges, and trusted public sources. No guide setup needed.</p>
+      <div class="grid two">
+        <label>Strategy
+          <select id="strategySelect">
+            <option value="balanced">Balanced progress</option>
+            <option value="rush">Strategic rushing</option>
+            <option value="max">Max everything before moving on</option>
+            <option value="war">War performance</option>
+            <option value="farming">Farming / fast loot</option>
+          </select>
+        </label>
+        <label>Plan length
+          <select id="planLengthSelect">
+            <option value="short">Short and direct</option>
+            <option value="detailed">A little more detail</option>
+          </select>
+        </label>
+      </div>
+      <div id="strategyPreview" class="strategy-preview"></div>
+      <div class="notice">Sources: official Supercell for facts, Clash Ninja/Clashify for planner data, Wiki for basic item info, and YouTube/community sources only for strategy opinions.</div>
+      <div class="ai-actions">
+        <button class="btn" id="generateAiPlanBtn" type="button">Generate plan</button>
+        <button class="btn secondary" id="clearAiPlanBtn" type="button">Clear plan</button>
+      </div>
+      <div id="aiStatus" class="notice" style="display:none"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Plan output</div>
+      <div id="aiOutput" class="ai-output empty">Pick a strategy, make sure your equipment and ores are entered, then click Generate plan.</div>
+      <div id="groundingBox" class="grounding-box" style="display:none"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Talk to the AI</div>
+      <p class="section-sub">Ask follow-up questions or tell it to change the plan. Example: “I want to rush harder,” “ignore walls,” or “make this work for Hydra.”</p>
+      <div class="chat-box">
+        <div id="aiChatThread" class="chat-thread"><div class="mini">No messages yet. Generate a plan first, or ask a follow-up below.</div></div>
+        <div class="chat-input-row">
+          <label>Message to AI<textarea id="aiChatInput" class="textarea-small" placeholder="Tell the AI what you want to change..."></textarea></label>
+          <button class="btn" id="sendAiChatBtn" type="button">Send</button>
+        </div>
+        <div class="row"><button class="btn secondary" id="clearAiChatBtn" type="button">Clear chat</button></div>
+      </div>
+    </div>
+  </section>
   <section class="panel" id="panel-supercharges"><div class="card"><div class="section-title">Supercharges</div><p class="section-sub">Analyze your village first. This shows eligible max-level buildings and any charge levels exposed in the export. If the export does not expose charge fields, it assumes charge 0.</p><div id="superchargeResults" class="queue"></div></div></section>
-  <footer>Version 19. Cleaner dashboard, cloud save, manual equipment, ore sources, saved guides, strategy profiles, and a simple AI plan.</footer>
+  <footer>Version 24. Cleaner layout, AI plan chat, cloud save, manual equipment, ores, AI strategies, and supercharges.</footer>
 </div>
 <script>
 "use strict";
@@ -430,17 +474,7 @@ function renderVillage(result){
     </div>`;
   }
 
-  const q=$("queueList");
-  q.innerHTML="";
-  const queue=buildQueue(result.items);
-  if(!queue.length) q.innerHTML='<div class="notice">No unfinished tracked upgrades found.</div>';
-  queue.forEach((it,idx)=>{
-    const div=document.createElement("div");
-    div.className="item";
-    const itemPct=it.cap?Math.round(it.done/it.cap*100):0;
-    div.innerHTML=`<div class="rank">${idx+1}</div><div><div class="item-title">${esc(it.name)}</div><div class="item-meta">${it.total>1?`${it.below}/${it.total} below max · lowest ${it.minLvl}/${it.max}`:`level ${it.minLvl} to ${it.max}`}</div>${it.why?`<div class="mini">${esc(it.why)}</div>`:""}</div><span class="pill">${esc(it.cat)}</span><div class="bar"><i style="width:${itemPct}%"></i></div>`;
-    q.appendChild(div);
-  });
+  // The old on-page upgrade focus list was removed for a cleaner main village tab.
 
   const catEl=$("categoryList");
   catEl.innerHTML="";
@@ -513,29 +547,20 @@ function renderStrategyControls(){
   const st=STRATEGIES[getPlannerStrategy()];
   if(prev) prev.innerHTML=`<b>${esc(st.label)}</b><br>${esc(st.desc)}`;
 }
-function loadGuides(){try{return JSON.parse(localStorage.getItem("scSavedGuides")||"[]");}catch(e){return [];}}
-function saveGuides(guides){localStorage.setItem("scSavedGuides",JSON.stringify((guides||[]).slice(0,12)));}
-function shortGuideText(t){t=String(t||"").trim();return t.length>1200?t.slice(0,1200)+"\n...":t;}
-function renderGuides(){const root=$("guideList"); if(!root)return; const guides=loadGuides(); if(!guides.length){root.innerHTML='<div class="notice">No guides saved yet. Paste one above so the AI has something reliable to follow.</div>';return;} root.innerHTML=guides.map(g=>`<div class="guide-card"><div class="guide-card-head"><div><div class="guide-title">${esc(g.title||"Untitled guide")}</div><div class="guide-type">${esc(g.type||"Guide")} - saved ${esc(g.savedAt||"")}</div></div><button class="btn secondary" type="button" data-delete-guide="${esc(g.id)}">Delete</button></div><div class="guide-text">${esc(shortGuideText(g.text))}</div></div>`).join(""); root.querySelectorAll("[data-delete-guide]").forEach(btn=>btn.addEventListener("click",()=>{const id=btn.dataset.deleteGuide; saveGuides(loadGuides().filter(g=>g.id!==id)); renderGuides();}));}
-function saveGuideFromForm(){const title=$("guideTitle")?.value.trim()||"Untitled guide"; const type=$("guideType")?.value||"Guide"; const text=$("guideText")?.value.trim()||""; if(!text){setStatus("Paste guide text before saving.",true); switchPanel("guides"); return;} const guides=loadGuides(); guides.unshift({id:String(Date.now()),title,type,text,savedAt:new Date().toLocaleDateString()}); saveGuides(guides); if($("guideTitle"))$("guideTitle").value=""; if($("guideText"))$("guideText").value=""; renderGuides(); setStatus("Guide saved. It will be included in the AI Plan.");}
 function buildAiOreNeedSummary(){const settings=loadOreSettings(); const goal=["max","minimum"].includes(settings.oreGoal)?settings.oreGoal:"max"; const ores=loadManualOres(); const monthly=calcMonthly(); const entered=gearRows().filter(r=>r.level>0); const total={shiny:0,glowy:0,starry:0}; const costs=[]; entered.forEach(eq=>{const target=goal==="minimum"?Math.min(eq.max,eq.min||eq.max):eq.max; if(eq.level>=target)return; const c=costBetween(eq.level,target,eq.rarity); addCost(total,c); costs.push({name:eq.display,hero:eq.hero,rarity:eq.rarity,level:eq.level,target,c});}); const needAfter={shiny:Math.max(0,total.shiny-num(ores.shiny)),glowy:Math.max(0,total.glowy-num(ores.glowy)),starry:Math.max(0,total.starry-num(ores.starry))}; const months={shiny:needAfter.shiny===0?0:(monthly.shiny?needAfter.shiny/monthly.shiny:null),glowy:needAfter.glowy===0?0:(monthly.glowy?needAfter.glowy/monthly.glowy:null),starry:needAfter.starry===0?0:(monthly.starry?needAfter.starry/monthly.starry:null)}; return {goal,currentOres:ores,monthlyGain:monthly,totalCost:total,neededAfterCurrent:needAfter,monthsByOre:months,costs:costs.slice(0,40)};}
 function getSuperclashAiContext(){let village=null; const raw=$("jsonInput")?.value.trim(); if(raw){try{const result=analyzeVillage(raw); const q=buildQueue(result.items).slice(0,8).map(i=>({name:i.name,category:i.cat,level:i.minLvl,max:i.max,below:i.below,total:i.total,why:i.why||""})); const timers=result.items.flatMap(i=>(i.timers||[]).map(t=>({name:i.name,level:t.lvl,count:t.cnt,remaining:formatDuration(t.seconds)}))).slice(0,20); village={townHall:result.thLvl,levelCompletionPercent: result.items.reduce((s,i)=>s+i.done,0) && result.items.reduce((s,i)=>s+i.cap,0) ? Math.round(result.items.reduce((s,i)=>s+i.done,0)/result.items.reduce((s,i)=>s+i.cap,0)*100) : null,topUpgradeFocus:q,activeTimers:timers,supercharges:(result.supercharges||[]).slice(0,20).map(s=>({name:s.name,kind:s.kind,eligible:s.eligible,lowestCharge:s.min,maxCharge:s.maxCharge}))};}catch(e){village={error:e.message};}}
   const sources=loadOreSources(); const enabledSources=Object.fromEntries(Object.entries(sources).filter(([k,v])=>v.enabled));
-  const strategyKey=getPlannerStrategy(); const planLength=getPlanLength(); return {generatedAt:new Date().toISOString(),strategy:{key:strategyKey,label:STRATEGIES[strategyKey].label,description:STRATEGIES[strategyKey].desc},planLength,village,manualEquipment:gearRows().filter(r=>r.level>0).map(r=>({name:r.display,hero:r.hero,rarity:r.rarity,level:r.level,max:r.max,recommendedMinimum:r.min})),ores:buildAiOreNeedSummary(),oreSourcesEnabled:enabledSources,guides:loadGuides().map(g=>({title:g.title,type:g.type,text:String(g.text||"").slice(0,8000)}))};}
+  const strategyKey=getPlannerStrategy(); const planLength=getPlanLength(); return {generatedAt:new Date().toISOString(),strategy:{key:strategyKey,label:STRATEGIES[strategyKey].label,description:STRATEGIES[strategyKey].desc},planLength,village,manualEquipment:gearRows().filter(r=>r.level>0).map(r=>({name:r.display,hero:r.hero,rarity:r.rarity,level:r.level,max:r.max,recommendedMinimum:r.min})),ores:buildAiOreNeedSummary(),oreSourcesEnabled:enabledSources};}
 window.getSuperclashAiContext=getSuperclashAiContext;
-window.renderGuides=renderGuides;
 
 let lastVillageResult=null; function switchPanel(id){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.panel===id));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id===`panel-${id}`));}
 document.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchPanel(b.dataset.panel))); const last=localStorage.getItem("warRoomLastExport"); if(last) $("jsonInput").value=last; $("analyzeBtn").addEventListener("click",()=>{try{renderVillage(analyzeVillage($("jsonInput").value.trim()));}catch(e){setStatus(e.message,true);}}); $("sampleBtn").addEventListener("click",()=>{$("jsonInput").value=JSON.stringify({tag:"#SAMPLE",buildings:[{data:1000001,lvl:18},{data:1000071,lvl:12},{data:1000007,lvl:15},{data:1000000,lvl:13,cnt:4},{data:1000012,lvl:16,cnt:4,supercharge:1}],heroes:[{data:28000000,lvl:97},{data:28000001,lvl:97},{data:28000002,lvl:70},{data:28000004,lvl:45},{data:28000006,lvl:80}],units:[{data:4000008,lvl:12}],spells:[{data:26000002,lvl:6}],pets:[{data:73000010,lvl:10}]},null,2); renderVillage(analyzeVillage($("jsonInput").value));}); renderEquipmentInputs(); renderOreControls(); renderOrePlanner(); renderSupercharges([]); $("clearGearBtn").addEventListener("click",()=>{if(confirm("Clear all manually entered equipment levels?")){saveGearLevels({});renderEquipmentInputs();renderOrePlanner();}}); if(last){try{renderVillage(analyzeVillage(last));}catch(e){}}});
 
 document.addEventListener("DOMContentLoaded",()=>{
-  renderGuides();
   renderStrategyControls();
-  $("saveGuideBtn")?.addEventListener("click",saveGuideFromForm);
-  $("clearGuideFormBtn")?.addEventListener("click",()=>{if($("guideTitle"))$("guideTitle").value=""; if($("guideText"))$("guideText").value="";});
   const savedPlan=localStorage.getItem("scLastAiPlan");
   if(savedPlan && $("aiOutput")){ $("aiOutput").classList.remove("empty"); $("aiOutput").textContent=savedPlan; }
-  $("clearAiPlanBtn")?.addEventListener("click",()=>{localStorage.removeItem("scLastAiPlan"); if($("aiOutput")){ $("aiOutput").classList.add("empty"); $("aiOutput").textContent="Plan cleared. Pick a strategy and click Generate plan when you are ready."; }});
+  $("clearAiPlanBtn")?.addEventListener("click",()=>{localStorage.removeItem("scLastAiPlan"); if($("aiOutput")){ $("aiOutput").classList.add("empty"); $("aiOutput").textContent="Plan cleared. Pick a strategy and click Generate plan when you are ready."; } const gb=$("groundingBox"); if(gb){gb.style.display="none"; gb.innerHTML="";} });
 });
 </script>
 <script type="module">
@@ -559,23 +584,27 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 let aiModel = null;
+let aiModelWeb = null;
 try {
   const ai = getAI(app, { backend: new GoogleAIBackend() });
-  aiModel = getGenerativeModel(ai, { model: "gemini-3.5-flash", tools: [{ googleSearch: {} }] });
+  // Use Flash-Lite by default to reduce quota pressure. Web grounding is tried first,
+  // then the app falls back to local/no-search mode if Google returns a 429 quota error.
+  aiModel = getGenerativeModel(ai, { model: "gemini-3.1-flash-lite" });
+  aiModelWeb = getGenerativeModel(ai, { model: "gemini-3.1-flash-lite", tools: [{ googleSearch: {} }] });
 } catch (err) {
   console.warn("AI Logic init failed", err);
 }
 let currentUser = null;
 
 const $id = (id) => document.getElementById(id);
-const SAVE_KEYS = ["warRoomLastExport", "scManualGearLevels", "scManualOres", "scOreSettings", "scOreSources", "scSavedGuides", "scLastAiPlan", "scPlannerStrategy", "scAiPlanLength"];
+const SAVE_KEYS = ["warRoomLastExport", "scManualGearLevels", "scManualOres", "scOreSettings", "scOreSources", "scLastAiPlan", "scAiChat", "scPlannerStrategy", "scAiPlanLength"];
 
 function getLocalSavePayload(){
   const data = {};
   SAVE_KEYS.forEach(k => data[k] = localStorage.getItem(k) || "");
   const jsonInput = $id("jsonInput");
   if(jsonInput && jsonInput.value.trim()) data.warRoomLastExport = jsonInput.value.trim();
-  return { version: 19, updatedAt: serverTimestamp(), data };
+  return { version: 24, updatedAt: serverTimestamp(), data };
 }
 
 function applyCloudPayload(payload){
@@ -585,7 +614,7 @@ function applyCloudPayload(payload){
     if(typeof v === "string" && v.length) localStorage.setItem(k, v);
     else localStorage.removeItem(k);
   });
-  location.href = location.pathname + "?v=19-cloud-" + Date.now();
+  location.href = location.pathname + "?v=24-cloud-" + Date.now();
 }
 
 function userSaveRef(){
@@ -660,72 +689,186 @@ function aiStatus(msg, isError=false){
 function buildAiPrompt(context){
   const strategy = context.strategy || {label:"Balanced progress",description:"Balanced progress."};
   const lengthInstruction = context.planLength === "detailed" ? "Give brief reasons for each recommendation, but still keep it phone-friendly." : "Keep each bullet short and direct.";
-  const hasGuides = context.guides && context.guides.length;
   return `You are the Superclash Planner AI for Clash of Clans. Be direct, practical, and concise.
 
 Selected player strategy: ${strategy.label}
 Strategy definition: ${strategy.description}
 Length preference: ${lengthInstruction}
-Saved guides present: ${hasGuides ? "yes" : "no"}
 
 Source rules:
-- Use the user's saved guides first when they cover the topic.
-- When saved guides do not cover a topic, use Google Search grounding. You may use a wider source set, not just one site.
+- Use the user's account data first: village export, equipment levels, ores, ore income sources, timers, and supercharges.
+- Use Google Search grounding for current public information when needed.
 - Source priority:
   1. Supercell official Clash of Clans patch notes/blog for game facts, release changes, and official mechanics.
-  2. Clash Ninja and Clashify for tracker/planner data, max-level references, costs, timers, and progression context.
+  2. Clash Ninja and Clashify for max-level references, planning data, costs, timers, and progression context.
   3. Clash of Clans Wiki for item identity and basic mechanics only.
-  4. Reputable community/meta sources for strategy opinions, including YouTube guide pages/videos, creator guides, Reddit discussions, and current community articles. Treat these as strategy opinions, not hard facts.
-- For YouTube/community advice, prefer recent sources, larger/reputable creators, and advice that is repeated by more than one source. Do not blindly trust one random comment or one outdated video.
-- If sources conflict, prefer official Supercell for game facts, then tracker sites for data, then community sources for meta/strategy.
-- If you cannot verify a claim from the saved guides or public sources, say it is not verified and keep the recommendation conservative.
+  4. YouTube guides, creator guides, Reddit discussions, and community articles for strategy/meta opinions only. Prefer recent, reputable, repeated advice.
+- If sources conflict, prefer official Supercell for facts, tracker sites for data, then community sources for strategy.
+- Do not invent exact costs, timers, stats, or meta claims. If uncertain, say what still needs checking.
 
 Planning rules:
-- Adapt every recommendation to the selected player strategy. Do not recommend a maxer-style plan to a rusher, or a rush plan to a maxer, unless the saved guides clearly say to.
-- Use the user's account data, equipment levels, ores, monthly ore sources, timers, and supercharges.
-- Do not invent exact game stats, costs, or meta claims.
-- Output a simple plan with these headings exactly:
+- Adapt every recommendation to the selected strategy. Do not give a maxing plan to a rusher or a rushing plan to a maxer.
+- Keep the plan action-focused. Do not explain the entire account unless it affects the next decision.
+- Output these headings exactly:
   Strategy
   1. Next 5 upgrades
   2. Ore spending
   3. What to avoid
   4. This week
-  5. Sources / guide notes used
+  5. Sources used
 - Keep it short enough to read on a phone.
 
-USER DATA AND SAVED GUIDES JSON:
+USER DATA JSON:
 ${JSON.stringify(context, null, 2)}`;
 }
-async function handleGenerateAiPlan(){
+async function renderAiResult(result, usedWeb){
   const out=document.getElementById("aiOutput");
-  if(!aiModel){aiStatus("AI Logic is not ready. Enable Firebase AI Logic in your Firebase project, then reload the site.", true); return;}
-  const context = window.getSuperclashAiContext ? window.getSuperclashAiContext() : null;
-  if(!context){aiStatus("Could not read planner data from the page.", true); return;}
-  try{
-    aiStatus(context.guides && context.guides.length ? "Generating plan from your guides + trusted sources..." : "Generating plan from public sources + your account data...");
-    const gb=document.getElementById("groundingBox");
-    if(gb){gb.style.display="none"; gb.innerHTML="";}
-    if(out){out.classList.remove("empty"); out.textContent="Generating your plan...";}
-    const result = await aiModel.generateContent(buildAiPrompt(context));
-    const text = result.response.text();
-    localStorage.setItem("scLastAiPlan", text);
-    if(out) out.textContent=text;
-    const meta = result?.response?.candidates?.[0]?.groundingMetadata;
-    if(gb && meta){
-      const queries = (meta.webSearchQueries || []).slice(0,5).map(q=>`<li>${String(q).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}</li>`).join("");
+  const gb=document.getElementById("groundingBox");
+  const text = result.response.text();
+  localStorage.setItem("scLastAiPlan", text);
+  if(out){out.classList.remove("empty"); out.textContent=text;}
+  const meta = result?.response?.candidates?.[0]?.groundingMetadata;
+  if(gb){
+    if(meta){
+      const escHtml=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+      const queries = (meta.webSearchQueries || []).slice(0,5).map(q=>`<li>${escHtml(q)}</li>`).join("");
       const chunks = (meta.groundingChunks || []).slice(0,6).map(ch=>{
-        const w=ch.web || {}; const title=String(w.title||w.uri||"Source").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); const uri=String(w.uri||"");
+        const w=ch.web || {}; const title=escHtml(w.title||w.uri||"Source"); const uri=String(w.uri||"");
         return uri ? `<li><a href="${uri}" target="_blank" rel="noopener">${title}</a></li>` : `<li>${title}</li>`;
       }).join("");
       const searchHtml = meta.searchEntryPoint?.renderedContent ? `<div style="margin-top:8px">${meta.searchEntryPoint.renderedContent}</div>` : "";
       gb.innerHTML = `<div class="title">Grounding used</div>${queries?`<div>Searches:</div><ul>${queries}</ul>`:""}${chunks?`<div>Sources:</div><ul>${chunks}</ul>`:""}${searchHtml}`;
       gb.style.display="block";
+    } else if(!usedWeb){
+      gb.innerHTML = `<div class="title">Local AI fallback used</div><p>Live web grounding hit a quota/rate limit, so this plan used your account data only. Try again later for live public-source grounding.</p>`;
+      gb.style.display="block";
+    } else {
+      gb.style.display="none"; gb.innerHTML="";
     }
-    aiStatus("Plan generated. Use Save to cloud if you want it synced.");
+  }
+}
+
+
+function loadAiChat(){
+  try { return JSON.parse(localStorage.getItem("scAiChat") || "[]"); }
+  catch(e){ return []; }
+}
+function saveAiChat(messages){
+  localStorage.setItem("scAiChat", JSON.stringify(messages.slice(-40)));
+}
+function renderAiChat(){
+  const thread=document.getElementById("aiChatThread");
+  if(!thread) return;
+  const messages=loadAiChat();
+  if(!messages.length){
+    thread.innerHTML='<div class="mini">No messages yet. Generate a plan first, or ask a follow-up below.</div>';
+    return;
+  }
+  const escHtml=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+  thread.innerHTML=messages.map(m=>`<div class="chat-msg ${m.role==='user'?'user':'ai'}"><span class="chat-name">${m.role==='user'?'You':'AI'}</span>${escHtml(m.text||'')}</div>`).join("");
+  thread.scrollTop=thread.scrollHeight;
+}
+function buildChatPrompt(context, userMessage, chatHistory){
+  const currentPlan = localStorage.getItem("scLastAiPlan") || "No generated plan yet.";
+  const shortHistory = (chatHistory || []).slice(-10);
+  return `You are the Superclash Planner AI. The user wants to reason with you and adjust the plan.
+
+Rules:
+- Be conversational but concise.
+- Use the user's account data and selected strategy.
+- Use Google Search grounding when useful for current Clash facts/meta.
+- Treat YouTube/community sources as strategy opinions, not hard facts.
+- If the user asks to change the plan, update the recommendation clearly.
+- Do not invent exact data. If something is missing, say what you need.
+
+Current generated plan:
+${currentPlan}
+
+Recent chat:
+${JSON.stringify(shortHistory, null, 2)}
+
+Current account context:
+${JSON.stringify(context, null, 2)}
+
+User message:
+${userMessage}`;
+}
+async function handleAiChatSend(){
+  const input=document.getElementById("aiChatInput");
+  const thread=document.getElementById("aiChatThread");
+  if(!input) return;
+  const message=input.value.trim();
+  if(!message){ aiStatus("Type a message for the AI first.", true); return; }
+  if(!aiModel){ aiStatus("AI Logic is not ready. Enable Firebase AI Logic, then reload the site.", true); return; }
+  const context = window.getSuperclashAiContext ? window.getSuperclashAiContext() : null;
+  if(!context){ aiStatus("Could not read planner data from the page.", true); return; }
+  const chat=loadAiChat();
+  chat.push({role:"user", text:message, at:new Date().toISOString()});
+  saveAiChat(chat); renderAiChat(); input.value="";
+  if(thread){ thread.scrollTop=thread.scrollHeight; }
+  try{
+    aiStatus("Asking AI...");
+    const prompt=buildChatPrompt(context, message, chat);
+    const result=await (aiModelWeb || aiModel).generateContent(prompt);
+    const text=result.response.text();
+    const next=loadAiChat();
+    next.push({role:"ai", text, at:new Date().toISOString()});
+    saveAiChat(next); renderAiChat();
+    aiStatus("AI replied. Use Save to cloud if you want this chat synced.");
+  }catch(err){
+    const msg=(err&&err.message)?err.message:String(err);
+    if(/429|quota|rate/i.test(msg) && aiModelWeb){
+      try{
+        aiStatus("Live AI sources hit quota, retrying without web grounding...");
+        const prompt=buildChatPrompt(context, message, loadAiChat()) + "\n\nLive web grounding is unavailable due to quota. Use account data only and say if something needs verification.";
+        const result=await aiModel.generateContent(prompt);
+        const text=result.response.text();
+        const next=loadAiChat();
+        next.push({role:"ai", text, at:new Date().toISOString()});
+        saveAiChat(next); renderAiChat();
+        aiStatus("AI replied using account-data fallback.");
+        return;
+      }catch(err2){
+        aiStatus("AI chat failed after fallback: " + ((err2&&err2.message)||String(err2)), true);
+        return;
+      }
+    }
+    aiStatus("AI chat failed: " + msg, true);
+  }
+}
+
+async function handleGenerateAiPlan(){
+  const out=document.getElementById("aiOutput");
+  if(!aiModel){aiStatus("AI Logic is not ready. Enable Firebase AI Logic in your Firebase project, then reload the site.", true); return;}
+  const context = window.getSuperclashAiContext ? window.getSuperclashAiContext() : null;
+  if(!context){aiStatus("Could not read planner data from the page.", true); return;}
+  const gb=document.getElementById("groundingBox");
+  if(gb){gb.style.display="none"; gb.innerHTML="";}
+  if(out){out.classList.remove("empty"); out.textContent="Generating your plan...";}
+  const prompt = buildAiPrompt(context);
+  try{
+    aiStatus("Trying live source-grounded AI first...");
+    const result = await (aiModelWeb || aiModel).generateContent(prompt);
+    await renderAiResult(result, true);
+    aiStatus("Plan generated with AI. Use Save to cloud if you want it synced.");
   }catch(err){
     const msg = (err && err.message) ? err.message : String(err);
-    aiStatus("AI failed: " + msg, true);
-    if(out){out.classList.add("empty"); out.textContent="AI did not generate a plan. Check that Firebase AI Logic is enabled and App Check is configured if Firebase asks for it.";}
+    if(/429|quota|rate/i.test(msg) && aiModelWeb){
+      try{
+        aiStatus("Live AI sources hit a quota limit, retrying with lower-quota local AI fallback...");
+        const fallbackPrompt = prompt + "\n\nIMPORTANT: Live Google Search grounding is temporarily unavailable because the app hit a quota/rate limit. Use only the user's account data. If a public fact is needed and not in the provided data, say it needs verification instead of guessing.";
+        const result = await aiModel.generateContent(fallbackPrompt);
+        await renderAiResult(result, false);
+        aiStatus("Plan generated with local AI fallback. Try again later for live web-grounded sources.");
+        return;
+      }catch(err2){
+        const msg2=(err2&&err2.message)?err2.message:String(err2);
+        aiStatus("AI failed after fallback: " + msg2, true);
+      }
+    } else {
+      aiStatus("AI failed: " + msg, true);
+    }
+    if(out){out.classList.add("empty"); out.textContent="AI did not generate a plan. This is usually a Gemini quota/rate-limit issue, not your site setup. Wait and try again.";}
   }
 }
 
@@ -740,6 +883,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   $id("cloudLoadBtn")?.addEventListener("click", handleCloudLoad);
   $id("signOutBtn")?.addEventListener("click", handleSignOut);
   $id("generateAiPlanBtn")?.addEventListener("click", handleGenerateAiPlan);
+  renderAiChat();
+  $id("sendAiChatBtn")?.addEventListener("click", handleAiChatSend);
+  $id("clearAiChatBtn")?.addEventListener("click", () => { localStorage.removeItem("scAiChat"); renderAiChat(); aiStatus("AI chat cleared."); });
   try { await getRedirectResult(auth); } catch(err) { toast("Redirect sign-in failed: " + (err.message || err), true); }
   onAuthStateChanged(auth, updateAuthUI);
 });
