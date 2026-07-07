@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoC Upgrade Advisor — Fixed Modern</title>
+<style>
+  :root {
+    --bg:#080b12;
+    --bg2:#101624;
+    --card:rgba(22,28,44,.82);
+    --card-solid:#151b2b;
+    --card-2:#1a2235;
+    --border:rgba(148,163,184,.18);
+    --border-strong:rgba(148,163,184,.28);
+    --text:#f8fafc;
+    --muted:#94a3b8;
+    --muted2:#64748b;
+    --accent:#7c3aed;
+    --accent2:#22c55e;
+    --gold:#f59e0b;
+    --danger:#fb7185;
+    --danger-bg:rgba(251,113,133,.12);
+    --warning-bg:rgba(245,158,11,.10);
+    --radius:18px;
+    --shadow:0 18px 60px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(900px 500px at 20% -10%,rgba(124,58,237,.28),transparent 65%),
+      radial-gradient(800px 420px at 90% 10%,rgba(34,197,94,.12),transparent 60%),
+      linear-gradient(180deg,var(--bg),#0b1020 55%,#070a11);
+    color:var(--text);
+    font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:28px 18px 80px}
+  header{padding:30px 0 20px}
+  .hero-card{
+    border:1px solid var(--border);
+    background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
+    box-shadow:var(--shadow);
+    border-radius:28px;
+    padding:28px;
+    backdrop-filter:blur(14px);
+  }
+  .kicker{
+    display:inline-flex;align-items:center;gap:8px;
+    color:#c4b5fd;background:rgba(124,58,237,.16);border:1px solid rgba(196,181,253,.22);
+    border-radius:999px;padding:7px 11px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  }
+  h1{font-size:clamp(36px,7vw,66px);letter-spacing:-.055em;line-height:.96;margin-top:18px;font-weight:850}
+  .gradient{background:linear-gradient(90deg,#fff,#c4b5fd 45%,#86efac);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{max-width:730px;color:var(--muted);font-size:15px;margin-top:14px}
+  .header-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  .pill{font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:8px 11px;background:rgba(15,23,42,.5)}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:18px}
+  @media (min-width:900px){.grid{grid-template-columns:minmax(0,1fr) 330px;align-items:start}}
+  .panel{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+    box-shadow:0 14px 40px rgba(0,0,0,.22);
+    backdrop-filter:blur(12px);
+  }
+  .panel h2,.queue-title,.cat-name,.th-banner .name{font-weight:780;letter-spacing:-.025em}
+  .panel h2{font-size:18px;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+  .steps{list-style:none;display:grid;gap:10px;margin:14px 0}
+  .steps li{display:flex;gap:10px;color:var(--muted);font-size:14px}
+  .steps b{color:var(--text)}
+  .step-n{
+    flex:none;width:25px;height:25px;border-radius:9px;display:grid;place-items:center;
+    font-size:12px;font-weight:800;color:#ddd6fe;background:rgba(124,58,237,.14);border:1px solid rgba(196,181,253,.20);
+  }
+  textarea{
+    width:100%;min-height:240px;resize:vertical;
+    background:#070b14;border:1px solid var(--border-strong);border-radius:16px;
+    color:var(--text);font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-size:12px;
+    padding:14px;line-height:1.55;outline:none;
+  }
+  textarea:focus{border-color:rgba(124,58,237,.75);box-shadow:0 0 0 4px rgba(124,58,237,.17)}
+  .btn-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  button{
+    appearance:none;border:0;border-radius:14px;padding:12px 16px;cursor:pointer;
+    font-family:inherit;font-weight:780;font-size:14px;letter-spacing:-.01em;
+    transition:transform .08s ease,box-shadow .15s ease,background .15s ease,border-color .15s ease;
+  }
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:3px solid rgba(196,181,253,.85);outline-offset:2px}
+  .btn-primary{background:linear-gradient(135deg,#8b5cf6,#5b21b6);color:white;box-shadow:0 12px 28px rgba(124,58,237,.28)}
+  .btn-primary:hover{box-shadow:0 16px 36px rgba(124,58,237,.38)}
+  .btn-ghost{background:rgba(148,163,184,.08);color:var(--text);border:1px solid var(--border)}
+  .btn-ghost:hover{background:rgba(148,163,184,.12);border-color:var(--border-strong)}
+  .err{display:none;margin-top:12px;padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.45;background:var(--danger-bg);border:1px solid rgba(251,113,133,.35);color:#fecdd3}
+  .side-note{display:grid;gap:12px}
+  .mini{border:1px solid var(--border);background:rgba(15,23,42,.45);border-radius:16px;padding:14px}
+  .mini .label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+  .mini .value{font-size:14px;margin-top:6px;color:#dbeafe}
+  #statusText{color:#bbf7d0}
+  #results{display:none;margin-top:18px}
+  .th-banner{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(34,197,94,.08));border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 14px 40px rgba(0,0,0,.20)}
+  .th-badge{flex:none;width:62px;height:62px;border-radius:18px;background:linear-gradient(135deg,#8b5cf6,#22c55e);display:grid;place-items:center;color:white;font-size:25px;font-weight:850;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+  .th-banner .meta{flex:1;min-width:0}
+  .th-banner .name{font-size:20px}
+  .th-banner .stat{color:var(--muted);font-size:13px;margin-top:2px}
+  .th-banner .pct{font-family:"SFMono-Regular",Consolas,monospace;font-size:24px;font-weight:900;color:#86efac}
+  .notice{margin-top:12px;padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.45;background:var(--warning-bg);border:1px solid rgba(245,158,11,.25);color:#fde68a}
+  .notice.bad{background:var(--danger-bg);border-color:rgba(251,113,133,.30);color:#fecdd3}
+  .queue{margin-top:20px}
+  .queue-title{font-size:22px;margin-bottom:4px}
+  .queue-sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+  .order{position:relative;display:flex;gap:14px;align-items:stretch;background:var(--card-solid);border:1px solid var(--border);border-radius:16px;padding:15px 16px;margin-bottom:10px;overflow:hidden}
+  .order.first{border-color:rgba(124,58,237,.55);background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(21,27,43,.95) 55%)}
+  .order .rank{flex:none;align-self:center;width:36px;text-align:center;font-size:20px;font-weight:900;color:#c4b5fd}
+  .order.first .rank{font-size:28px;color:#fff}
+  .order .body{flex:1;min-width:0}
+  .order .what{font-weight:800;font-size:15px}
+  .order .lvls{font-family:"SFMono-Regular",Consolas,monospace;font-size:12px;color:#c4b5fd;margin-top:2px}
+  .order .why{color:var(--muted);font-size:13px;line-height:1.45;margin-top:6px}
+  .tag{display:inline-block;font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:999px;margin-top:8px;background:rgba(148,163,184,.08);border:1px solid var(--border);color:var(--muted)}
+  .tag.hero{color:#fde68a;border-color:rgba(245,158,11,.35)}.tag.lab{color:#d8b4fe;border-color:rgba(168,85,247,.35)}.tag.def{color:#bfdbfe;border-color:rgba(96,165,250,.35)}.tag.army{color:#bbf7d0;border-color:rgba(34,197,94,.35)}.tag.unknown{color:#fecdd3;border-color:rgba(251,113,133,.35)}
+  details.cat{margin-top:14px;background:var(--card-solid);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  details.cat summary{list-style:none;cursor:pointer;padding:15px 16px;display:flex;align-items:center;gap:10px;user-select:none}
+  details.cat summary::-webkit-details-marker{display:none}
+  .cat-name{font-size:16px;flex:1}
+  .cat-count{font-family:"SFMono-Regular",Consolas,monospace;font-size:12px;color:var(--muted)}
+  .chev{transition:transform .2s;color:var(--muted)}
+  details[open] .chev{transform:rotate(90deg)}
+  .rows{padding:0 16px 15px;display:grid;gap:10px}
+  .row{display:grid;grid-template-columns:1fr auto;gap:5px 12px;align-items:center}
+  .row .nm{font-size:14px;font-weight:650}
+  .row .nm small{color:var(--muted);font-weight:500}
+  .row .lv{font-family:"SFMono-Regular",Consolas,monospace;font-size:12px;color:var(--muted);text-align:right}
+  .row .lv.maxed{color:#86efac}
+  .bar{grid-column:1/-1;height:8px;border-radius:99px;background:#070b14;border:1px solid rgba(148,163,184,.14);overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+  .bar i.full{background:linear-gradient(90deg,#16a34a,#86efac)}
+  .bar i.lab-bar{background:linear-gradient(90deg,#a855f7,#f0abfc)}
+  .bar i.unknown-bar{background:linear-gradient(90deg,#475569,#94a3b8)}
+  footer{margin-top:34px;text-align:center;color:var(--muted2);font-size:12px;line-height:1.7}
+  code{font-family:"SFMono-Regular",Consolas,monospace;background:rgba(148,163,184,.12);padding:2px 5px;border-radius:6px;color:#e2e8f0}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="hero-card">
+      <div class="kicker">TH17/TH18 Upgrade Advisor</div>
+      <h1><span class="gradient">CoC Upgrade Tracker</span></h1>
+      <p class="sub">Paste your village export and get a modern, TH-aware breakdown. This version shows errors on-screen, tracks lab/pets/siege correctly, and lists unknown Data Export IDs instead of hiding them.</p>
+      <div class="header-actions">
+        <span class="pill">No cursive fonts</span>
+        <span class="pill">Safer button handling</span>
+        <span class="pill">Unmapped ID section</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="panel" id="importPanel">
+      <h2>Import your village</h2>
+      <ol class="steps">
+        <li><span class="step-n">1</span><span>Open Clash of Clans → <b>Settings</b> → <b>More Settings</b>.</span></li>
+        <li><span class="step-n">2</span><span>Use <b>Data Export</b> and copy the JSON.</span></li>
+        <li><span class="step-n">3</span><span>Paste it below and click <b>Analyze</b>.</span></li>
+      </ol>
+      <textarea id="jsonInput" placeholder='{"tag":"#XXXXXXX","timestamp":...,"buildings":[{"data":1000001,"lvl":18}]}' spellcheck="false"></textarea>
+      <div class="btn-row">
+        <button class="btn-primary" id="analyzeBtn" type="button">Analyze base</button>
+        <button class="btn-ghost" id="sampleBtn" type="button">Load sample</button>
+      </div>
+      <div class="err" id="errBox"></div>
+    </section>
+
+    <aside class="side-note">
+      <div class="mini">
+        <div class="label">Status</div>
+        <div class="value" id="statusText">Loading analyzer…</div>
+      </div>
+      <div class="mini">
+        <div class="label">What changed</div>
+        <div class="value">Buttons are wired after page load, errors appear on the page, and the old cursive font styling is gone.</div>
+      </div>
+      <div class="mini">
+        <div class="label">Accuracy note</div>
+        <div class="value">Known Data Export IDs are tracked. Brand-new or unmapped IDs show at the bottom so they can be added later.</div>
+      </div>
+    </aside>
+  </main>
+
+  <section id="results">
+    <div class="th-banner">
+      <div class="th-badge" id="thBadge">?</div>
+      <div class="meta">
+        <div class="name" id="thName">Town Hall</div>
+        <div class="stat" id="thStat"></div>
+      </div>
+      <div class="pct" id="thPct"></div>
+    </div>
+    <div class="notice" id="thNotice" style="display:none"></div>
+    <div class="notice bad" id="unknownNotice" style="display:none"></div>
+
+    <div class="queue">
+      <div class="queue-title">Next upgrades</div>
+      <div class="queue-sub">Top unfinished upgrades ranked by priority and how far behind they are.</div>
+      <div id="queueList"></div>
+    </div>
+
+    <div id="catList"></div>
+  </section>
+
+  <footer>
+    Fixed modern version. Update the <code>ITEMS</code> table when Supercell adds new Data Export IDs.
+  </footer>
+</div>
+<script>
+"use strict";
+
+/* =====================================================================
+   FIXED GAME DATA
+   Main fixes:
+   1) max levels are Town-Hall-aware: maxByTh: {17:x, 18:y}
+   2) lab/pet/siege entries now have max caps, so they don't fake 100%
+   3) unknown IDs are displayed at the bottom instead of silently ignored
+   ===================================================================== */
+
+const ITEMS = {
+  // core / army
+  1000001:{name:"Town Hall",cat:"core",maxByTh:{17:17,18:18},prio:100},
+  1000071:{name:"Hero Hall",cat:"core",maxByTh:{17:11,18:12},prio:100,why:"Gatekeeper for hero caps. If this is behind, your hero levels are capped."},
+  1000007:{name:"Laboratory",cat:"core",maxByTh:{17:15,18:16},prio:90,why:"Lab downtime is permanent lost progress. Keep it moving."},
+  1000006:{name:"Barracks",cat:"army",maxByTh:{17:19,18:19},prio:70,why:"Unlocks and supports the latest regular troop lines."},
+  1000026:{name:"Dark Barracks",cat:"army",maxByTh:{17:13,18:13},prio:63},
+  1000020:{name:"Spell Factory",cat:"army",maxByTh:{17:9,18:9},prio:68},
+  1000029:{name:"Dark Spell Factory",cat:"army",maxByTh:{17:8,18:8},prio:64},
+  1000059:{name:"Workshop",cat:"army",maxByTh:{17:9,18:9},prio:62,why:"Siege unlocks/upgrades matter a ton for fast spam attacks."},
+  1000068:{name:"Pet House",cat:"army",maxByTh:{17:11,18:12},prio:66,why:"Pet levels multiply your hero investment."},
+  1000070:{name:"Blacksmith",cat:"army",maxByTh:{17:10,18:10},prio:64,why:"Higher equipment caps are huge hidden power."},
+  1000000:{name:"Army Camp",cat:"army",maxByTh:{17:13,18:14},prio:56,why:"Raw housing space helps every army."},
+  1000014:{name:"Clan Castle",cat:"army",maxByTh:{17:13,18:14},prio:55},
+
+  // heroes
+  28000000:{name:"Barbarian King",cat:"hero",maxByTh:{17:100,18:110},prio:80,why:"Hero levels are always premium value if you can keep attacking around downtime."},
+  28000001:{name:"Archer Queen",cat:"hero",maxByTh:{17:100,18:110},prio:85,why:"Usually the highest-value hero upgrade line."},
+  28000006:{name:"Minion Prince",cat:"hero",maxByTh:{17:90,18:95},prio:84},
+  28000002:{name:"Grand Warden",cat:"hero",maxByTh:{17:75,18:85},prio:82},
+  28000004:{name:"Royal Champion",cat:"hero",maxByTh:{17:50,18:55},prio:81},
+  // Dragon Duke dataId is not in the public mapping I found; if your export has him, he'll show under Unmapped until the ID is added.
+
+  // defenses
+  1000089:{name:"Firespitter",cat:"def",maxByTh:{17:2,18:3},prio:50,why:"Major late-game defense. Cheap early levels are high value."},
+  1000079:{name:"Multi-Gear Tower",cat:"def",maxByTh:{17:2,18:3},prio:49},
+  1000085:{name:"Ricochet Cannon",cat:"def",maxByTh:{17:3,18:4},prio:48,why:"Merged defenses carry high-TH bases."},
+  1000084:{name:"Multi-Archer Tower",cat:"def",maxByTh:{17:3,18:4},prio:47},
+  1000067:{name:"Scattershot",cat:"def",maxByTh:{17:6,18:7},prio:45},
+  1000027:{name:"Inferno Tower",cat:"def",maxByTh:{17:11,18:12},prio:44},
+  1000077:{name:"Monolith",cat:"def",maxByTh:{17:4,18:5},prio:43},
+  1000072:{name:"Spell Tower",cat:"def",maxByTh:{17:4,18:4},prio:42},
+  1000021:{name:"X-Bow",cat:"def",maxByTh:{17:12,18:13},prio:36},
+  1000019:{name:"Hidden Tesla",cat:"def",maxByTh:{17:16,18:17},prio:35},
+  1000032:{name:"Bomb Tower",cat:"def",maxByTh:{17:12,18:13},prio:34},
+  1000013:{name:"Mortar",cat:"def",maxByTh:{17:17,18:18},prio:30},
+  1000009:{name:"Archer Tower",cat:"def",maxByTh:{17:21,18:21},prio:29},
+  1000008:{name:"Cannon",cat:"def",maxByTh:{17:21,18:21},prio:28},
+  1000028:{name:"Air Sweeper",cat:"def",maxByTh:{17:7,18:7},prio:27},
+  1000015:{name:"Builder's Hut",cat:"def",maxByTh:{17:7,18:8},prio:40},
+  1000012:{name:"Air Defense",cat:"def",maxByTh:{17:15,18:16},prio:37},
+  1000011:{name:"Wizard Tower",cat:"def",maxByTh:{17:17,18:17},prio:38},
+  1000031:{name:"Eagle Artillery",cat:"def",maxByTh:{16:7},noCarry:true,prio:25},
+  1000097:{name:"Inferno Artillery / Crafted Defense",cat:"def",maxByTh:{17:5},noCarry:true,prio:24},
+
+  // traps
+  12000000:{name:"Bomb",cat:"trap",maxByTh:{17:13,18:14},prio:15},
+  12000001:{name:"Spring Trap",cat:"trap",maxByTh:{17:12,18:13},prio:15},
+  12000002:{name:"Giant Bomb",cat:"trap",maxByTh:{17:11,18:12},prio:16},
+  12000005:{name:"Air Bomb",cat:"trap",maxByTh:{17:12,18:13},prio:15},
+  12000006:{name:"Seeking Air Mine",cat:"trap",maxByTh:{17:7,18:8},prio:16},
+  12000008:{name:"Skeleton Trap",cat:"trap",maxByTh:{17:4,18:5},prio:14},
+  12000016:{name:"Tornado Trap",cat:"trap",maxByTh:{17:3,18:3},prio:14},
+  12000020:{name:"Giga Bomb",cat:"trap",maxByTh:{17:3,18:4},prio:17},
+
+  // resources / walls
+  1000004:{name:"Gold Mine",cat:"res",maxByTh:{17:17,18:17},prio:12},
+  1000002:{name:"Elixir Collector",cat:"res",maxByTh:{17:17,18:17},prio:12},
+  1000023:{name:"Dark Elixir Drill",cat:"res",maxByTh:{17:11,18:11},prio:13},
+  1000005:{name:"Gold Storage",cat:"res",maxByTh:{17:18,18:19},prio:20,why:"Only urgent when storage capacity blocks an upgrade."},
+  1000003:{name:"Elixir Storage",cat:"res",maxByTh:{17:18,18:19},prio:20},
+  1000024:{name:"Dark Elixir Storage",cat:"res",maxByTh:{17:12,18:13},prio:20},
+  1000010:{name:"Wall",cat:"wall",maxByTh:{17:18,18:19},prio:5,why:"Loot dump. Don't park a builder priority here."},
+
+  // pets
+  73000000:{name:"L.A.S.S.I",cat:"pet",maxByTh:{17:15,18:15},labPrio:2},
+  73000001:{name:"Electro Owl",cat:"pet",maxByTh:{17:15,18:15},labPrio:3},
+  73000002:{name:"Mighty Yak",cat:"pet",maxByTh:{17:15,18:15},labPrio:2},
+  73000003:{name:"Unicorn",cat:"pet",maxByTh:{17:15,18:15},labPrio:8},
+  73000004:{name:"Phoenix",cat:"pet",maxByTh:{17:10,18:10},labPrio:6},
+  73000007:{name:"Poison Lizard",cat:"pet",maxByTh:{17:15,18:15},labPrio:5},
+  73000008:{name:"Diggy",cat:"pet",maxByTh:{17:10,18:10},labPrio:7},
+  73000009:{name:"Frosty",cat:"pet",maxByTh:{17:15,18:15},labPrio:4},
+  73000010:{name:"Spirit Fox",cat:"pet",maxByTh:{17:10,18:10},labPrio:9},
+  73000011:{name:"Angry Jelly",cat:"pet",maxByTh:{17:10,18:10},labPrio:6},
+  73000016:{name:"Sneezy",cat:"pet",maxByTh:{17:10,18:10},labPrio:7},
+  // Greedy Raven ID not in the public mapping I found.
+
+  // siege machines
+  4000051:{name:"Wall Wrecker",cat:"siege",maxByTh:{17:5,18:6},labPrio:2},
+  4000052:{name:"Battle Blimp",cat:"siege",maxByTh:{17:5,18:6},labPrio:5},
+  4000062:{name:"Stone Slammer",cat:"siege",maxByTh:{17:5,18:6},labPrio:4},
+  4000075:{name:"Siege Barracks",cat:"siege",maxByTh:{17:5,18:6},labPrio:4},
+  4000087:{name:"Log Launcher",cat:"siege",maxByTh:{17:5,18:6},labPrio:4},
+  4000091:{name:"Flame Flinger",cat:"siege",maxByTh:{17:5,18:5},labPrio:4},
+  4000092:{name:"Battle Drill",cat:"siege",maxByTh:{17:5,18:6},labPrio:6},
+  4000135:{name:"Troop Launcher",cat:"siege",maxByTh:{17:4,18:4},labPrio:9},
+  // Sky Wagon ID not in the public mapping I found.
+
+  // troops
+  4000110:{name:"Root Rider",cat:"troop",maxByTh:{17:3,18:4},labPrio:10},
+  4000123:{name:"Druid",cat:"troop",maxByTh:{17:5,18:6},labPrio:10},
+  4000132:{name:"Thrower",cat:"troop",maxByTh:{17:3,18:4},labPrio:10},
+  4000095:{name:"Electro Titan",cat:"troop",maxByTh:{17:4,18:5},labPrio:8},
+  4000053:{name:"Yeti",cat:"troop",maxByTh:{17:7,18:8},labPrio:8},
+  4000097:{name:"Apprentice Warden",cat:"troop",maxByTh:{17:4,18:4},labPrio:8},
+  4000065:{name:"Dragon Rider",cat:"troop",maxByTh:{17:5,18:6},labPrio:7},
+  4000059:{name:"Electro Dragon",cat:"troop",maxByTh:{17:8,18:9},labPrio:6},
+  4000008:{name:"Dragon",cat:"troop",maxByTh:{17:12,18:13},labPrio:7},
+  4000023:{name:"Baby Dragon",cat:"troop",maxByTh:{17:11,18:12},labPrio:5},
+  4000006:{name:"Wizard",cat:"troop",maxByTh:{17:13,18:14},labPrio:6},
+  4000004:{name:"Wall Breaker",cat:"troop",maxByTh:{17:13,18:14},labPrio:6},
+  4000005:{name:"Balloon",cat:"troop",maxByTh:{17:12,18:13},labPrio:5},
+  4000007:{name:"Healer",cat:"troop",maxByTh:{17:10,18:11},labPrio:6},
+  4000011:{name:"Hog Rider",cat:"troop",maxByTh:{17:14,18:15},labPrio:5},
+  4000024:{name:"Miner",cat:"troop",maxByTh:{17:11,18:12},labPrio:5},
+  4000022:{name:"Bowler",cat:"troop",maxByTh:{17:9,18:10},labPrio:5},
+  4000015:{name:"Witch",cat:"troop",maxByTh:{17:7,18:8},labPrio:4},
+  4000012:{name:"Valkyrie",cat:"troop",maxByTh:{17:12,18:12},labPrio:3},
+  4000013:{name:"Golem",cat:"troop",maxByTh:{17:14,18:15},labPrio:3},
+  4000017:{name:"Lava Hound",cat:"troop",maxByTh:{17:7,18:8},labPrio:4},
+  4000058:{name:"Ice Golem",cat:"troop",maxByTh:{17:9,18:9},labPrio:4},
+  4000082:{name:"Headhunter",cat:"troop",maxByTh:{17:4,18:4},labPrio:5},
+  4000003:{name:"Giant",cat:"troop",maxByTh:{17:13,18:14},labPrio:3},
+  4000000:{name:"Barbarian",cat:"troop",maxByTh:{17:12,18:13},labPrio:2},
+  4000001:{name:"Archer",cat:"troop",maxByTh:{17:13,18:14},labPrio:2},
+  4000002:{name:"Goblin",cat:"troop",maxByTh:{17:9,18:10},labPrio:1},
+  4000010:{name:"Minion",cat:"troop",maxByTh:{17:13,18:14},labPrio:3},
+  4000009:{name:"P.E.K.K.A",cat:"troop",maxByTh:{17:12,18:13},labPrio:3},
+  4000150:{name:"Furnace",cat:"troop",maxByTh:{17:4,18:4},labPrio:4},
+  // Meteor Golem and Ruin Witch IDs not in the public mapping I found.
+
+  // spells
+  26000002:{name:"Rage Spell",cat:"spell",maxByTh:{17:6,18:7},labPrio:9},
+  26000098:{name:"Revive Spell",cat:"spell",maxByTh:{17:4,18:5},labPrio:9},
+  26000070:{name:"Overgrowth Spell",cat:"spell",maxByTh:{17:4,18:5},labPrio:8},
+  26000010:{name:"Earthquake Spell",cat:"spell",maxByTh:{17:7,18:8},labPrio:8},
+  26000000:{name:"Lightning Spell",cat:"spell",maxByTh:{17:12,18:13},labPrio:8},
+  26000005:{name:"Freeze Spell",cat:"spell",maxByTh:{17:7,18:8},labPrio:6},
+  26000035:{name:"Invisibility Spell",cat:"spell",maxByTh:{17:4,18:4},labPrio:7},
+  26000053:{name:"Recall Spell",cat:"spell",maxByTh:{17:6,18:7},labPrio:7},
+  26000001:{name:"Healing Spell",cat:"spell",maxByTh:{17:11,18:12},labPrio:5},
+  26000003:{name:"Jump Spell",cat:"spell",maxByTh:{17:5,18:5},labPrio:5},
+  26000009:{name:"Poison Spell",cat:"spell",maxByTh:{17:11,18:12},labPrio:6},
+  26000011:{name:"Haste Spell",cat:"spell",maxByTh:{17:6,18:7},labPrio:4},
+  26000016:{name:"Clone Spell",cat:"spell",maxByTh:{17:8,18:9},labPrio:3},
+  26000017:{name:"Skeleton Spell",cat:"spell",maxByTh:{17:8,18:8},labPrio:3},
+  26000028:{name:"Bat Spell",cat:"spell",maxByTh:{17:7,18:8},labPrio:4},
+  26000109:{name:"Ice Block Spell",cat:"spell",maxByTh:{17:5,18:6},labPrio:6}
+  // Angry Spell and Totem Spell IDs not in the public mapping I found.
+};
+
+const CATS = [
+  {id:"core",label:"🏛️ Core buildings"},
+  {id:"hero",label:"👑 Heroes"},
+  {id:"army",label:"⚔️ Army buildings"},
+  {id:"troop",label:"🧪 Lab — troops"},
+  {id:"spell",label:"🧪 Lab — spells"},
+  {id:"pet",label:"🐾 Pets"},
+  {id:"siege",label:"🛠️ Siege machines"},
+  {id:"def",label:"🛡️ Defenses"},
+  {id:"trap",label:"💣 Traps"},
+  {id:"res",label:"💰 Resources"},
+  {id:"wall",label:"🧱 Walls"},
+  {id:"unknown",label:"⚠️ Unmapped / not yet tracked"}
+];
+
+function num(v){
+  if (typeof v === "number") return v;
+  if (typeof v === "string" && v.trim() !== "") return Number(v);
+  return NaN;
+}
+
+function getMaxForTH(info, thLvl){
+  if (!info) return null;
+  if (info.maxByTh){
+    if (thLvl != null && info.maxByTh[thLvl] != null) return info.maxByTh[thLvl];
+    if (info.noCarry) return null;
+    // Future-proof fallback: for a future TH, carry the newest known cap forward.
+    // For lower THs, only use a cap if that TH or a lower known TH exists.
+    const keys = Object.keys(info.maxByTh).map(Number).filter(k => thLvl == null || k <= thLvl).sort((a,b)=>b-a);
+    if (keys.length) return info.maxByTh[keys[0]];
+  }
+  return info.max ?? null;
+}
+
+function harvest(node,out,path=[]){
+  if (Array.isArray(node)){ node.forEach((n,i)=>harvest(n,out,path.concat(i))); return; }
+  if (node && typeof node === "object"){
+    const data = num(node.data), lvl = num(node.lvl);
+    if (Number.isFinite(data) && Number.isFinite(lvl)){
+      out.push({data, lvl, cnt:Number.isFinite(num(node.cnt)) ? num(node.cnt) : 1, timer:node.timer, path:path.join(".")});
+    }
+    for (const k in node) harvest(node[k],out,path.concat(k));
+  }
+}
+
+function analyze(raw){
+  let json;
+  try { json = JSON.parse(raw); }
+  catch(e){ throw new Error("That doesn't parse as JSON. Make sure you copied the whole export from Data Export → Copy."); }
+
+  const entries=[];
+  harvest(json,entries);
+  if (!entries.length) throw new Error("Parsed the JSON but found no {data, lvl} entries. Double-check the export copy.");
+
+  const byId=new Map();
+  for (const e of entries){
+    if (!byId.has(e.data)) byId.set(e.data,[]);
+    byId.get(e.data).push(e);
+  }
+
+  const th = byId.get(1000001);
+  const thLvl = th ? Math.max(...th.map(e=>e.lvl)) : null;
+
+  const items=[];
+  for (const [id,list] of byId){
+    const baseInfo = ITEMS[id];
+    const info = baseInfo || {name:`Unknown data ID ${id}`,cat:"unknown",unknown:true,prio:0};
+    const total = list.reduce((s,e)=>s+e.cnt,0);
+    const max = getMaxForTH(info, thLvl);
+    let below=0,minLvl=Infinity,maxLvlSeen=0,upgrading=0;
+    for (const e of list){
+      minLvl = Math.min(minLvl,e.lvl);
+      maxLvlSeen = Math.max(maxLvlSeen,e.lvl);
+      if (e.timer != null) upgrading += e.cnt;
+      if (max != null && e.lvl < max) below += e.cnt;
+    }
+    const done = max != null ? list.reduce((s,e)=>s+Math.min(e.lvl,max)*e.cnt,0) : 0;
+    const capacity = max != null ? max*total : 0;
+    items.push({id,...info,total,max,below,minLvl,maxLvlSeen,upgrading,
+      remaining:max!=null ? list.reduce((s,e)=>s+Math.max(0,max-e.lvl)*e.cnt,0) : 0,
+      done,capacity,paths:[...new Set(list.map(e=>e.path.split(".")[0]).filter(Boolean))]
+    });
+  }
+  return {thLvl,items};
+}
+
+function itemPriority(it){ return it.prio ?? (it.labPrio ? it.labPrio*4 : 10); }
+
+function buildQueue(items){
+  const cand=items.filter(it=>it.max!=null && it.below>0 && it.cat!=="wall" && it.cat!=="unknown");
+  cand.sort((a,b)=>{
+    const pa=itemPriority(a), pb=itemPriority(b);
+    if (pb!==pa) return pb-pa;
+    if (b.remaining!==a.remaining) return b.remaining-a.remaining;
+    return (b.max-b.minLvl)-(a.max-a.minLvl);
+  });
+  return cand.slice(0,8);
+}
+
+const TAGMAP={core:"hero",hero:"hero",army:"army",troop:"lab",spell:"lab",pet:"lab",siege:"lab",def:"def",trap:"def",res:"def",wall:"def",unknown:"unknown"};
+const TAGLABEL={core:"Builder",hero:"Hero Hall",army:"Builder",troop:"Laboratory",spell:"Laboratory",pet:"Pet House",siege:"Workshop",def:"Builder",trap:"Builder",res:"Builder",wall:"Builder",unknown:"Unmapped"};
+
+function render(result){
+  const {thLvl,items}=result;
+  document.getElementById("thBadge").textContent = thLvl ?? "?";
+  document.getElementById("thName").textContent = thLvl ? `Town Hall ${thLvl}` : "Town Hall";
+
+  const tracked=items.filter(i=>i.max!=null && i.cat!=="unknown");
+  const done=tracked.reduce((s,i)=>s+i.done,0), cap=tracked.reduce((s,i)=>s+i.capacity,0);
+  const pct=cap ? Math.round(done/cap*100) : 0;
+  document.getElementById("thPct").textContent = pct + "%";
+  const upgrading=items.reduce((s,i)=>s+i.upgrading,0);
+  document.getElementById("thStat").textContent =
+    `${tracked.filter(i=>i.below===0).length}/${tracked.length} tracked item types maxed` +
+    (upgrading ? ` · ${upgrading} upgrade${upgrading>1?"s":""} running` : "");
+
+  const notice=document.getElementById("thNotice");
+  if (thLvl && ![17,18].includes(thLvl)){
+    notice.style.display="block";
+    notice.textContent=`Heads up: this fixed table is mainly tuned for TH17/TH18. You are TH${thLvl}, so some lower-TH caps may be approximate.`;
+  } else if (thLvl===18){
+    notice.style.display="block";
+    notice.textContent="Using TH18 caps. Completion percent only counts mapped items with known max levels; unmapped newer IDs are listed separately.";
+  } else if (thLvl===17){
+    notice.style.display="block";
+    notice.textContent="Using TH17 caps. Completion percent only counts mapped items with known max levels; unmapped newer IDs are listed separately.";
+  } else notice.style.display="none";
+
+  const unknowns=items.filter(i=>i.cat==="unknown");
+  const unknownNotice=document.getElementById("unknownNotice");
+  if (unknowns.length){
+    unknownNotice.style.display="block";
+    unknownNotice.textContent=`Found ${unknowns.length} unmapped data ID${unknowns.length>1?"s":""}. This usually means newer items, hero equipment, helpers, guardians, decorations, or IDs missing from the public mapping. They are shown at the bottom instead of ignored.`;
+  } else unknownNotice.style.display="none";
+
+  const q=buildQueue(items);
+  const qEl=document.getElementById("queueList");
+  qEl.innerHTML="";
+  if (!q.length){
+    qEl.innerHTML=`<div class="order first"><div class="body"><div class="what">No tracked priority upgrades found 👑</div><div class="why">Either you're maxed for the mapped table, or the remaining items are unmapped IDs shown below.</div></div></div>`;
+  }
+  q.forEach((it,i)=>{
+    const div=document.createElement("div");
+    div.className="order"+(i===0?" first":"");
+    const lvlTxt=it.total>1 ? `${it.below}× below max · lowest lvl ${it.minLvl} → ${it.max}` : `lvl ${it.minLvl} → ${it.max}`;
+    div.innerHTML=`
+      <div class="rank">${i+1}</div>
+      <div class="body">
+        <div class="what">${esc(it.name)}</div>
+        <div class="lvls">${lvlTxt}</div>
+        ${it.why?`<div class="why">${esc(it.why)}</div>`:""}
+        <span class="tag ${TAGMAP[it.cat]}">${TAGLABEL[it.cat]}</span>
+      </div>`;
+    qEl.appendChild(div);
+  });
+
+  const catEl=document.getElementById("catList");
+  catEl.innerHTML="";
+  for (const cat of CATS){
+    const list=items.filter(i=>i.cat===cat.id);
+    if (!list.length) continue;
+    list.sort((a,b)=>{
+      const pa=itemPriority(a), pb=itemPriority(b);
+      if (pb!==pa) return pb-pa;
+      return String(a.name).localeCompare(String(b.name));
+    });
+    const maxedCount=list.filter(i=>i.max!=null && i.below===0).length;
+    const trackedCount=list.filter(i=>i.max!=null).length;
+    const d=document.createElement("details");
+    d.className="cat";
+    if (["hero","core","unknown"].includes(cat.id)) d.open=true;
+    d.innerHTML=`<summary>
+        <span class="cat-name">${cat.label}</span>
+        <span class="cat-count">${trackedCount ? `${maxedCount}/${trackedCount} maxed` : `${list.length} listed`}</span>
+        <span class="chev">▸</span>
+      </summary>`;
+    const rows=document.createElement("div");
+    rows.className="rows";
+    for (const it of list){
+      const row=document.createElement("div");
+      row.className="row";
+      const isLab=["troop","spell","pet","siege"].includes(it.cat);
+      let lvTxt,pctFill,full=false,barClass="";
+      if (it.max!=null){
+        full=it.below===0;
+        lvTxt=it.total>1 ? (full ? `all ${it.total} maxed (${it.max})` : `${it.below}/${it.total} to go · low ${it.minLvl}/${it.max}`) : (full ? `maxed ${it.max}` : `${it.minLvl}/${it.max}`);
+        pctFill=Math.round(it.done/it.capacity*100);
+        if (isLab && !full) barClass="lab-bar";
+      } else {
+        lvTxt=it.total>1 ? `${it.total}× · highest lvl ${it.maxLvlSeen}` : `lvl ${it.maxLvlSeen}`;
+        if (it.paths.length) lvTxt += ` · ${it.paths.join(", ")}`;
+        pctFill=100; full=false; barClass="unknown-bar";
+      }
+      row.innerHTML=`
+        <div class="nm">${esc(it.name)}${it.upgrading?` <small>⏳ upgrading</small>`:""}</div>
+        <div class="lv ${full?"maxed":""}">${esc(lvTxt)}</div>
+        <div class="bar"><i class="${full?"full":""} ${barClass}" style="width:${pctFill}%"></i></div>`;
+      rows.appendChild(row);
+    }
+    d.appendChild(rows);
+    catEl.appendChild(d);
+  }
+
+  document.getElementById("results").style.display="block";
+  document.getElementById("results").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+const app = {
+  jsonInput: null,
+  analyzeBtn: null,
+  sampleBtn: null,
+  errBox: null,
+  statusText: null
+};
+
+function setError(message) {
+  if (!app.errBox) return;
+  app.errBox.textContent = message;
+  app.errBox.style.display = "block";
+}
+
+function clearError() {
+  if (!app.errBox) return;
+  app.errBox.textContent = "";
+  app.errBox.style.display = "none";
+}
+
+function setStatus(message) {
+  if (app.statusText) app.statusText.textContent = message;
+}
+
+function runAnalyze() {
+  clearError();
+  try {
+    const raw = app.jsonInput.value.trim();
+    if (!raw) throw new Error("Paste your Clash of Clans Data Export JSON first, then hit Analyze.");
+    const result = analyze(raw);
+    render(result);
+    const mapped = result.items.filter(i => i.cat !== "unknown").length;
+    const unknown = result.items.filter(i => i.cat === "unknown").length;
+    setStatus(`Analyzed TH${result.thLvl ?? "?"} · ${mapped} mapped IDs · ${unknown} unmapped IDs`);
+  } catch (e) {
+    setError(e && e.message ? e.message : String(e));
+    setStatus("Analysis failed — check the message above.");
+  }
+}
+
+function loadSample() {
+  const sample={
+    tag:"#SAMPLE",timestamp:Date.now(),
+    buildings:[
+      {data:1000001,lvl:18},{data:1000071,lvl:11},{data:1000007,lvl:15},{data:1000006,lvl:19},
+      {data:1000020,lvl:9},{data:1000029,lvl:7},{data:1000068,lvl:11},{data:1000070,lvl:9},
+      {data:1000059,lvl:8},{data:1000000,lvl:13,cnt:4},{data:1000014,lvl:13},
+      {data:1000089,lvl:2,cnt:2},{data:1000085,lvl:3,cnt:2},{data:1000084,lvl:3,cnt:2},
+      {data:1000079,lvl:2},{data:1000067,lvl:6,cnt:2},{data:1000027,lvl:11,cnt:3,timer:432000},
+      {data:1000077,lvl:4},{data:1000072,lvl:4,cnt:2},{data:1000011,lvl:17,cnt:5},
+      {data:1000012,lvl:15,cnt:4},{data:1000021,lvl:12,cnt:4},{data:1000019,lvl:16,cnt:5},
+      {data:1000013,lvl:17,cnt:4},{data:1000009,lvl:21,cnt:5},{data:1000008,lvl:21,cnt:6},
+      {data:1000005,lvl:18,cnt:4},{data:1000003,lvl:18,cnt:4},{data:1000024,lvl:12},
+      {data:1000004,lvl:17,cnt:7},{data:1000002,lvl:17,cnt:7},{data:1000023,lvl:11,cnt:3},
+      {data:1000010,lvl:18,cnt:325}
+    ],
+    heroes:[
+      {data:28000000,lvl:103},{data:28000001,lvl:106},{data:28000006,lvl:90,timer:250000},
+      {data:28000002,lvl:80},{data:28000004,lvl:52}
+    ],
+    units:[
+      {data:4000110,lvl:3},{data:4000123,lvl:5},{data:4000132,lvl:3},{data:4000095,lvl:4},
+      {data:4000053,lvl:7},{data:4000008,lvl:12},{data:4000059,lvl:8},{data:4000011,lvl:14}
+    ],
+    spells:[{data:26000002,lvl:6},{data:26000098,lvl:4},{data:26000070,lvl:4},{data:26000005,lvl:7}],
+    pets:[{data:73000000,lvl:15},{data:73000010,lvl:10},{data:73000011,lvl:8},{data:73000016,lvl:9}],
+    siege_machines:[{data:4000051,lvl:5},{data:4000092,lvl:5},{data:4000135,lvl:4}],
+    // fake unknown to demonstrate the new unmapped section
+    guardians:[{data:107000000,lvl:1}]
+  };
+  app.jsonInput.value = JSON.stringify(sample, null, 2);
+  clearError();
+  runAnalyze();
+}
+
+window.addEventListener("error", function(event) {
+  setError("JavaScript error: " + event.message);
+  setStatus("A browser script error stopped the analyzer.");
+});
+
+window.addEventListener("unhandledrejection", function(event) {
+  const reason = event.reason && event.reason.message ? event.reason.message : String(event.reason || "Unknown promise error");
+  setError("JavaScript error: " + reason);
+  setStatus("A browser script error stopped the analyzer.");
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+  app.jsonInput = document.getElementById("jsonInput");
+  app.analyzeBtn = document.getElementById("analyzeBtn");
+  app.sampleBtn = document.getElementById("sampleBtn");
+  app.errBox = document.getElementById("errBox");
+  app.statusText = document.getElementById("statusText");
+
+  if (!app.jsonInput || !app.analyzeBtn || !app.sampleBtn || !app.errBox) {
+    setError("Page setup error: one of the required HTML elements is missing.");
+    return;
+  }
+
+  app.analyzeBtn.addEventListener("click", runAnalyze);
+  app.sampleBtn.addEventListener("click", loadSample);
+  setStatus("Ready. Paste your export or load sample data.");
+});
+
+</script>
+</body>
+</html>
