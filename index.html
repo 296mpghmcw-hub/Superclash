@@ -110,6 +110,30 @@
   .th-banner .pct{font-family:"SFMono-Regular",Consolas,monospace;font-size:24px;font-weight:900;color:#86efac}
   .notice{margin-top:12px;padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.45;background:var(--warning-bg);border:1px solid rgba(245,158,11,.25);color:#fde68a}
   .notice.bad{background:var(--danger-bg);border-color:rgba(251,113,133,.30);color:#fecdd3}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 6px}
+  .tab-btn{background:rgba(148,163,184,.08);color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:10px 14px;font-size:13px}
+  .tab-btn.active{background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(34,197,94,.16));color:#fff;border-color:rgba(196,181,253,.38)}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px}
+  .stat-card{background:var(--card-solid);border:1px solid var(--border);border-radius:16px;padding:14px}
+  .stat-card .label{font-size:11px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.08em}
+  .stat-card .big{font-size:22px;font-weight:900;margin-top:4px;color:#fff}
+  .stat-card .small{font-size:12px;color:var(--muted);margin-top:3px}
+  .equipment-grid{display:grid;gap:10px;margin-top:14px}
+  .equip-card,.super-card{background:var(--card-solid);border:1px solid var(--border);border-radius:16px;padding:14px;display:grid;gap:8px}
+  .equip-top,.super-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .equip-name,.super-name{font-weight:850;letter-spacing:-.015em}
+  .equip-meta,.super-meta{font-family:"SFMono-Regular",Consolas,monospace;font-size:12px;color:var(--muted)}
+  .badge-row{display:flex;gap:6px;flex-wrap:wrap}
+  .badge{display:inline-flex;align-items:center;border-radius:999px;border:1px solid var(--border);background:rgba(148,163,184,.08);padding:4px 8px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .badge.epic{color:#f0abfc;border-color:rgba(217,70,239,.36)}
+  .badge.common{color:#bfdbfe;border-color:rgba(96,165,250,.36)}
+  .badge.ore{color:#fde68a;border-color:rgba(245,158,11,.36)}
+  .ore-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:10px}
+  .ore-input{background:#070b14;border:1px solid var(--border);border-radius:12px;padding:10px;color:var(--text)}
+  .ore-input label{display:block;font-size:11px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+  .ore-input input{width:100%;background:transparent;border:0;color:var(--text);font:inherit;font-weight:800;outline:none}
   .queue{margin-top:20px}
   .queue-title{font-size:22px;margin-bottom:4px}
   .queue-sub{color:var(--muted);font-size:13px;margin-bottom:14px}
@@ -205,13 +229,38 @@
     <div class="notice" id="thNotice" style="display:none"></div>
     <div class="notice bad" id="unknownNotice" style="display:none"></div>
 
-    <div class="queue">
-      <div class="queue-title">Next upgrades</div>
-      <div class="queue-sub">Top unfinished upgrades ranked by priority and how far behind they are.</div>
-      <div id="queueList"></div>
+    <div class="tabs" role="tablist" aria-label="Result tabs">
+      <button class="tab-btn active" type="button" data-tab="upgrades">Upgrades</button>
+      <button class="tab-btn" type="button" data-tab="equipment">Equipment and ores</button>
+      <button class="tab-btn" type="button" data-tab="supercharges">Supercharges</button>
     </div>
 
-    <div id="catList"></div>
+    <div id="tab-upgrades" class="tab-panel active">
+      <div class="queue">
+        <div class="queue-title">Next upgrades</div>
+        <div class="queue-sub">Top unfinished upgrades ranked by priority and how far behind they are.</div>
+        <div id="queueList"></div>
+      </div>
+      <div id="catList"></div>
+    </div>
+
+    <div id="tab-equipment" class="tab-panel">
+      <div class="queue">
+        <div class="queue-title">Equipment and ores</div>
+        <div class="queue-sub">Tracks equipment levels if your export includes equipment data. Ore balances are detected when the export exposes ore fields.</div>
+        <div id="equipmentSummary"></div>
+        <div id="equipmentList" class="equipment-grid"></div>
+      </div>
+    </div>
+
+    <div id="tab-supercharges" class="tab-panel">
+      <div class="queue">
+        <div class="queue-title">Supercharges</div>
+        <div class="queue-sub">Shows current Supercharge progress for eligible max-level buildings. If the export does not expose charge fields, the tool assumes charge 0.</div>
+        <div id="superchargeSummary"></div>
+        <div id="superchargeList" class="equipment-grid"></div>
+      </div>
+    </div>
   </section>
 
   <footer>
@@ -372,18 +421,85 @@ const ITEMS = {
 };
 
 const CATS = [
-  {id:"core",label:"🏛️ Core buildings"},
-  {id:"hero",label:"👑 Heroes"},
-  {id:"army",label:"⚔️ Army buildings"},
-  {id:"troop",label:"🧪 Lab — troops"},
-  {id:"spell",label:"🧪 Lab — spells"},
-  {id:"pet",label:"🐾 Pets"},
-  {id:"siege",label:"🛠️ Siege machines"},
-  {id:"def",label:"🛡️ Defenses"},
-  {id:"trap",label:"💣 Traps"},
-  {id:"res",label:"💰 Resources"},
-  {id:"wall",label:"🧱 Walls"}
+  {id:"core",label:"Core buildings"},
+  {id:"hero",label:"Heroes"},
+  {id:"army",label:"Army buildings"},
+  {id:"troop",label:"Lab - troops"},
+  {id:"spell",label:"Lab - spells"},
+  {id:"pet",label:"Pets"},
+  {id:"siege",label:"Siege machines"},
+  {id:"def",label:"Defenses"},
+  {id:"trap",label:"Traps"},
+  {id:"res",label:"Resources"},
+  {id:"wall",label:"Walls"}
 ];
+
+// Equipment max caps: Common = 18, Epic = 27. These names are from Clash Ninja's current equipment list.
+const EQUIPMENT_META = {
+  "barbarian puppet":{hero:"Barbarian King",rarity:"Common",max:18},
+  "rage vial":{hero:"Barbarian King",rarity:"Common",max:18},
+  "earthquake boots":{hero:"Barbarian King",rarity:"Common",max:18},
+  "vampstache":{hero:"Barbarian King",rarity:"Common",max:18},
+  "giant gauntlet":{hero:"Barbarian King",rarity:"Epic",max:27},
+  "spiky ball":{hero:"Barbarian King",rarity:"Epic",max:27},
+  "snake bracelet":{hero:"Barbarian King",rarity:"Epic",max:27},
+  "stick horse":{hero:"Barbarian King",rarity:"Epic",max:27},
+  "archer puppet":{hero:"Archer Queen",rarity:"Common",max:18},
+  "invisibility vial":{hero:"Archer Queen",rarity:"Common",max:18},
+  "giant arrow":{hero:"Archer Queen",rarity:"Common",max:18},
+  "healer puppet":{hero:"Archer Queen",rarity:"Common",max:18},
+  "frozen arrow":{hero:"Archer Queen",rarity:"Epic",max:27},
+  "magic mirror":{hero:"Archer Queen",rarity:"Epic",max:27},
+  "action figure":{hero:"Archer Queen",rarity:"Epic",max:27},
+  "monolith arrow":{hero:"Archer Queen",rarity:"Epic",max:27},
+  "eternal tome":{hero:"Grand Warden",rarity:"Common",max:18},
+  "life gem":{hero:"Grand Warden",rarity:"Common",max:18},
+  "healing tome":{hero:"Grand Warden",rarity:"Common",max:18},
+  "rage gem":{hero:"Grand Warden",rarity:"Common",max:18},
+  "fireball":{hero:"Grand Warden",rarity:"Epic",max:27},
+  "lavaloon puppet":{hero:"Grand Warden",rarity:"Epic",max:27},
+  "heroic torch":{hero:"Grand Warden",rarity:"Epic",max:27},
+  "royal gem":{hero:"Royal Champion",rarity:"Common",max:18},
+  "seeking shield":{hero:"Royal Champion",rarity:"Common",max:18},
+  "hog rider puppet":{hero:"Royal Champion",rarity:"Common",max:18},
+  "haste vial":{hero:"Royal Champion",rarity:"Common",max:18},
+  "rocket spear":{hero:"Royal Champion",rarity:"Epic",max:27},
+  "electro boots":{hero:"Royal Champion",rarity:"Epic",max:27},
+  "frost flake":{hero:"Royal Champion",rarity:"Epic",max:27},
+  "dark orb":{hero:"Minion Prince",rarity:"Common",max:18},
+  "henchmen puppet":{hero:"Minion Prince",rarity:"Common",max:18},
+  "metal pants":{hero:"Minion Prince",rarity:"Common",max:18},
+  "noble iron":{hero:"Minion Prince",rarity:"Common",max:18},
+  "dark crown":{hero:"Minion Prince",rarity:"Epic",max:27},
+  "meteor staff":{hero:"Minion Prince",rarity:"Epic",max:27},
+  "fire heart":{hero:"Minion Prince",rarity:"Epic",max:27},
+  "flame blower":{hero:"Dragon Duke",rarity:"Common",max:18},
+  "stun blaster":{hero:"Dragon Duke",rarity:"Common",max:18},
+  "electro fangs":{hero:"Dragon Duke",rarity:"Common",max:18},
+  "rocket backpack":{hero:"Dragon Duke",rarity:"Epic",max:27}
+};
+
+// Best-effort Data Export ID mappings. If Supercell changes or adds IDs, unknown equipment still appears by ID.
+const EQUIPMENT_ID_NAMES = {
+};
+
+const SUPERCHARGE_INFO = {
+  1000004:{name:"Gold Mine",maxCharge:3,kind:"Collector"},
+  1000002:{name:"Elixir Collector",maxCharge:3,kind:"Collector"},
+  1000023:{name:"Dark Elixir Drill",maxCharge:3,kind:"Collector"},
+  1000012:{name:"Air Defense",maxCharge:2,kind:"Defense"},
+  1000032:{name:"Bomb Tower",maxCharge:2,kind:"Defense"},
+  1000019:{name:"Hidden Tesla",maxCharge:2,kind:"Defense"},
+  1000027:{name:"Inferno Tower",maxCharge:2,kind:"Defense"},
+  1000013:{name:"Mortar",maxCharge:2,kind:"Defense"},
+  1000021:{name:"X-Bow",maxCharge:2,kind:"Defense"},
+  1000067:{name:"Scattershot",maxCharge:2,kind:"Defense"},
+  1000085:{name:"Ricochet Cannon",maxCharge:2,kind:"Defense"},
+  1000084:{name:"Multi-Archer Tower",maxCharge:2,kind:"Defense"},
+  1000089:{name:"Firespitter",maxCharge:2,kind:"Defense"},
+  1000079:{name:"Multi-Gear Tower",maxCharge:2,kind:"Defense"},
+  1000011:{name:"Wizard Tower / Super Wizard Tower",maxCharge:2,kind:"Defense"}
+};
 
 function num(v){
   if (typeof v === "number") return v;
@@ -409,7 +525,7 @@ function harvest(node,out,path=[]){
   if (node && typeof node === "object"){
     const data = num(node.data), lvl = num(node.lvl);
     if (Number.isFinite(data) && Number.isFinite(lvl)){
-      out.push({data, lvl, cnt:Number.isFinite(num(node.cnt)) ? num(node.cnt) : 1, timer:node.timer, path:path.join(".")});
+      out.push({data, lvl, cnt:Number.isFinite(num(node.cnt)) ? num(node.cnt) : 1, timer:node.timer, path:path.join("."), raw:node});
     }
     for (const k in node) harvest(node[k],out,path.concat(k));
   }
@@ -428,6 +544,132 @@ function harvestHomeVillage(json,out){
   }
   // Fallback for unusual exports, but normal Data Export should use the roots above.
   if (!out.length) harvest(json,out,[]);
+}
+
+function cleanName(s){ return String(s || "").trim(); }
+function normName(s){ return cleanName(s).toLowerCase().replace(/[_-]+/g," ").replace(/\s+/g," "); }
+function firstDefined(){ for (const v of arguments){ if (v !== undefined && v !== null && v !== "") return v; } return undefined; }
+
+function collectEquipment(json){
+  const found=[];
+  const seen=new Set();
+  function walk(node,path=[],context={}){
+    if (Array.isArray(node)){ node.forEach((n,i)=>walk(n,path.concat(i),context)); return; }
+    if (!node || typeof node !== "object") return;
+    const pathText=path.join(".").toLowerCase();
+    const inEquipPath=path.some(k=>/equip|gear|blacksmith/i.test(String(k)));
+    const name=cleanName(firstDefined(node.name,node.equipment_name,node.equipmentName,node.itemName,node.label,node.title));
+    const idVal=num(firstDefined(node.data,node.dataId,node.id,node.equipmentId,node.gearId));
+    const lvlVal=num(firstDefined(node.lvl,node.level,node.currentLevel,node.equipmentLevel));
+    const rarityText=cleanName(firstDefined(node.rarity,node.type,node.equipmentRarity));
+    const nameKey=normName(name || EQUIPMENT_ID_NAMES[idVal]);
+    const known=EQUIPMENT_META[nameKey] || null;
+    const looksLikeEquipment = inEquipPath || !!known || /hero.?equipment|equipment|blacksmith|gear/.test(pathText);
+    if (looksLikeEquipment && Number.isFinite(lvlVal) && (name || Number.isFinite(idVal))){
+      const displayName = name || EQUIPMENT_ID_NAMES[idVal] || `Equipment ID ${idVal}`;
+      const rarity = known?.rarity || rarityText || (lvlVal > 18 ? "Epic?" : "Unknown");
+      const maxFromNode = num(firstDefined(node.maxLevel,node.max,node.cap));
+      const max = Number.isFinite(maxFromNode) ? maxFromNode : (known?.max || (String(rarity).toLowerCase().includes("epic") ? 27 : 18));
+      const hero = known?.hero || cleanName(firstDefined(node.hero,node.heroName,node.assignedHero,context.hero)) || "Unassigned/unknown";
+      const key = `${displayName}|${lvlVal}|${path.join(".")}`;
+      if (!seen.has(key)){
+        seen.add(key);
+        found.push({id:Number.isFinite(idVal)?idVal:null,name:displayName,level:lvlVal,max,rarity,hero,path:path.join("."),equipped:!!node.equipped || !!node.active});
+      }
+    }
+    let nextContext=context;
+    if (name && /king|queen|warden|champion|prince|duke/i.test(name)) nextContext={...context,hero:name};
+    for (const k in node) walk(node[k],path.concat(k),nextContext);
+  }
+  walk(json,[]);
+  found.sort((a,b)=>{
+    const aDone=a.level>=a.max, bDone=b.level>=b.max;
+    if (aDone!==bDone) return aDone?1:-1;
+    if ((b.max-b.level)!==(a.max-a.level)) return (b.max-b.level)-(a.max-a.level);
+    return a.name.localeCompare(b.name);
+  });
+  return found;
+}
+
+function findOres(json){
+  const ores={shiny:null,glowy:null,starry:null};
+  const seen={shiny:[],glowy:[],starry:[]};
+  function setOre(type,val,path){
+    const n=num(val);
+    if (!Number.isFinite(n)) return;
+    seen[type].push({value:n,path:path.join(".")});
+    if (ores[type] == null || n > ores[type]) ores[type]=n;
+  }
+  function walk(node,path=[]){
+    if (Array.isArray(node)){ node.forEach((n,i)=>walk(n,path.concat(i))); return; }
+    if (!node || typeof node !== "object") return;
+    const name=normName(firstDefined(node.name,node.resource,node.type,node.label));
+    const amount=firstDefined(node.amount,node.count,node.cnt,node.value,node.quantity,node.balance);
+    if (name.includes("shiny") && name.includes("ore")) setOre("shiny",amount,path.concat("amount"));
+    if (name.includes("glowy") && name.includes("ore")) setOre("glowy",amount,path.concat("amount"));
+    if (name.includes("starry") && name.includes("ore")) setOre("starry",amount,path.concat("amount"));
+    for (const k in node){
+      const key=String(k).toLowerCase().replace(/[_-]+/g," ");
+      const joined=path.concat(k).join(".").toLowerCase();
+      if (key.includes("shiny") && (key.includes("ore") || joined.includes("ore"))) setOre("shiny",node[k],path.concat(k));
+      if (key.includes("glowy") && (key.includes("ore") || joined.includes("ore"))) setOre("glowy",node[k],path.concat(k));
+      if (key.includes("starry") && (key.includes("ore") || joined.includes("ore"))) setOre("starry",node[k],path.concat(k));
+      walk(node[k],path.concat(k));
+    }
+  }
+  walk(json,[]);
+  return {ores,seen};
+}
+
+function extractChargeLevel(raw){
+  if (!raw || typeof raw !== "object") return 0;
+  const preferred=["supercharge","super_charge","superCharge","charge","charge_lvl","chargeLevel","supercharge_lvl","superchargeLevel","boost_lvl","boostLevel"];
+  for (const k of preferred){
+    const n=num(raw[k]);
+    if (Number.isFinite(n)) return Math.max(0,n);
+  }
+  for (const k in raw){
+    const lk=String(k).toLowerCase();
+    if ((lk.includes("charge") || lk.includes("super")) && !lk.includes("recharge") && !lk.includes("cooldown")){
+      const n=num(raw[k]);
+      if (Number.isFinite(n)) return Math.max(0,n);
+    }
+  }
+  return 0;
+}
+
+function analyzeSupercharges(byId,thLvl){
+  const rows=[];
+  for (const [id,sc] of Object.entries(SUPERCHARGE_INFO)){
+    const list=byId.get(Number(id)) || [];
+    if (!list.length) continue;
+    const info=ITEMS[id];
+    const standardMax=getMaxForTH(info,thLvl);
+    let eligible=0, total=0, chargeDone=0, chargeCap=0, minCharge=Infinity, upgrading=0;
+    for (const e of list){
+      const count=e.cnt || 1;
+      total+=count;
+      const isEligible=standardMax == null || e.lvl >= standardMax;
+      if (e.timer != null) upgrading+=count;
+      if (isEligible){
+        eligible+=count;
+        const c=Math.min(extractChargeLevel(e.raw),sc.maxCharge);
+        minCharge=Math.min(minCharge,c);
+        chargeDone += c*count;
+        chargeCap += sc.maxCharge*count;
+      }
+    }
+    if (eligible>0){
+      rows.push({id:Number(id),name:sc.name,kind:sc.kind,maxCharge:sc.maxCharge,total,eligible,chargeDone,chargeCap,minCharge:minCharge===Infinity?0:minCharge,upgrading,standardMax});
+    }
+  }
+  rows.sort((a,b)=>{
+    const ar=a.chargeCap? a.chargeDone/a.chargeCap : 1;
+    const br=b.chargeCap? b.chargeDone/b.chargeCap : 1;
+    if (ar!==br) return ar-br;
+    return a.name.localeCompare(b.name);
+  });
+  return rows;
 }
 
 function analyze(raw){
@@ -469,7 +711,10 @@ function analyze(raw){
       done,capacity,paths:[...new Set(list.map(e=>e.path.split(".")[0]).filter(Boolean))]
     });
   }
-  return {thLvl,items};
+  const equipment = collectEquipment(json);
+  const ores = findOres(json);
+  const supercharges = analyzeSupercharges(byId, thLvl);
+  return {thLvl,items,equipment,ores,supercharges};
 }
 
 function itemPriority(it){ return it.prio ?? (it.labPrio ? it.labPrio*4 : 10); }
@@ -488,8 +733,91 @@ function buildQueue(items){
 const TAGMAP={core:"hero",hero:"hero",army:"army",troop:"lab",spell:"lab",pet:"lab",siege:"lab",def:"def",trap:"def",res:"def",wall:"def",unknown:"unknown"};
 const TAGLABEL={core:"Builder",hero:"Hero Hall",army:"Builder",troop:"Laboratory",spell:"Laboratory",pet:"Pet House",siege:"Workshop",def:"Builder",trap:"Builder",res:"Builder",wall:"Builder",unknown:"Unmapped"};
 
+function renderEquipmentTab(equipment, oreData){
+  const summary=document.getElementById("equipmentSummary");
+  const listEl=document.getElementById("equipmentList");
+  if (!summary || !listEl) return;
+  const ores=oreData?.ores || {shiny:null,glowy:null,starry:null};
+  const total=equipment.length;
+  const maxed=equipment.filter(e=>e.level>=e.max).length;
+  const avg=total ? Math.round(equipment.reduce((s,e)=>s+(e.level/e.max),0)/total*100) : 0;
+  summary.innerHTML=`
+    <div class="stat-grid">
+      <div class="stat-card"><div class="label">Equipment found</div><div class="big">${total}</div><div class="small">From equipment/gear fields in your JSON</div></div>
+      <div class="stat-card"><div class="label">Maxed</div><div class="big">${maxed}/${total || 0}</div><div class="small">Common cap 18, Epic cap 27</div></div>
+      <div class="stat-card"><div class="label">Average progress</div><div class="big">${avg}%</div><div class="small">Based on detected equipment only</div></div>
+    </div>
+    <div class="ore-inputs">
+      <div class="ore-input"><label>Shiny Ore</label><input value="${ores.shiny ?? "not detected"}" readonly></div>
+      <div class="ore-input"><label>Glowy Ore</label><input value="${ores.glowy ?? "not detected"}" readonly></div>
+      <div class="ore-input"><label>Starry Ore</label><input value="${ores.starry ?? "not detected"}" readonly></div>
+    </div>
+    <div class="notice" style="display:block">Ores are read only if the export includes ore fields. Equipment upgrades are instant and use Shiny, Glowy, and sometimes Starry Ore.</div>`;
+  listEl.innerHTML="";
+  if (!equipment.length){
+    listEl.innerHTML=`<div class="equip-card"><div class="equip-name">No equipment entries found</div><div class="equip-meta">Your export may not expose equipment, or it may use a new field name. Paste an export/API JSON that contains hero equipment and this tab will list it.</div></div>`;
+    return;
+  }
+  for (const eq of equipment){
+    const full=eq.level>=eq.max;
+    const pct=Math.max(0,Math.min(100,Math.round(eq.level/eq.max*100)));
+    const div=document.createElement("div");
+    div.className="equip-card";
+    div.innerHTML=`
+      <div class="equip-top">
+        <div>
+          <div class="equip-name">${esc(eq.name)}</div>
+          <div class="equip-meta">${esc(eq.hero)} · level ${eq.level}/${eq.max}</div>
+        </div>
+        <div class="badge-row"><span class="badge ${String(eq.rarity).toLowerCase().includes("epic")?"epic":"common"}">${esc(eq.rarity)}</span>${eq.equipped?`<span class="badge ore">Equipped</span>`:""}</div>
+      </div>
+      <div class="bar"><i class="${full?"full":"lab-bar"}" style="width:${pct}%"></i></div>`;
+    listEl.appendChild(div);
+  }
+}
+
+function renderSuperchargeTab(rows){
+  const summary=document.getElementById("superchargeSummary");
+  const listEl=document.getElementById("superchargeList");
+  if (!summary || !listEl) return;
+  const totalRows=rows.length;
+  const done=rows.reduce((s,r)=>s+r.chargeDone,0);
+  const cap=rows.reduce((s,r)=>s+r.chargeCap,0);
+  const pct=cap ? Math.round(done/cap*100) : 0;
+  const maxedTypes=rows.filter(r=>r.chargeCap && r.chargeDone>=r.chargeCap).length;
+  summary.innerHTML=`
+    <div class="stat-grid">
+      <div class="stat-card"><div class="label">Eligible types</div><div class="big">${totalRows}</div><div class="small">Max-level buildings detected</div></div>
+      <div class="stat-card"><div class="label">Supercharged</div><div class="big">${maxedTypes}/${totalRows}</div><div class="small">Tracked building types complete</div></div>
+      <div class="stat-card"><div class="label">Charge progress</div><div class="big">${pct}%</div><div class="small">Assumes 0 if no charge field exists</div></div>
+    </div>
+    <div class="notice" style="display:block">Supercharges are temporary endgame upgrades. Defenses generally have 2 charge levels and collectors have 3.</div>`;
+  listEl.innerHTML="";
+  if (!rows.length){
+    listEl.innerHTML=`<div class="super-card"><div class="super-name">No eligible Supercharges found</div><div class="super-meta">This usually means your buildings are not at the standard max level yet, or the export does not include eligible buildings.</div></div>`;
+    return;
+  }
+  for (const row of rows){
+    const pctFill=row.chargeCap ? Math.round(row.chargeDone/row.chargeCap*100) : 0;
+    const full=row.chargeCap && row.chargeDone>=row.chargeCap;
+    const div=document.createElement("div");
+    div.className="super-card";
+    const chargeText = row.eligible>1 ? `${row.eligible} eligible · lowest charge ${row.minCharge}/${row.maxCharge}` : `charge ${row.minCharge}/${row.maxCharge}`;
+    div.innerHTML=`
+      <div class="super-top">
+        <div>
+          <div class="super-name">${esc(row.name)}</div>
+          <div class="super-meta">${esc(row.kind)} · ${chargeText}</div>
+        </div>
+        <div class="badge-row"><span class="badge ${row.kind==="Collector"?"ore":"common"}">${esc(row.kind)}</span>${row.upgrading?`<span class="badge epic">upgrading</span>`:""}</div>
+      </div>
+      <div class="bar"><i class="${full?"full":"lab-bar"}" style="width:${pctFill}%"></i></div>`;
+    listEl.appendChild(div);
+  }
+}
+
 function render(result){
-  const {thLvl,items}=result;
+  const {thLvl,items,equipment,ores,supercharges}=result;
   document.getElementById("thBadge").textContent = thLvl ?? "?";
   document.getElementById("thName").textContent = thLvl ? `Town Hall ${thLvl}` : "Town Hall";
 
@@ -516,6 +844,9 @@ function render(result){
 
   const unknownNotice=document.getElementById("unknownNotice");
   if (unknownNotice) unknownNotice.style.display="none";
+
+  renderEquipmentTab(equipment || [], ores);
+  renderSuperchargeTab(supercharges || []);
 
   const q=buildQueue(items);
   const qEl=document.getElementById("queueList");
@@ -623,7 +954,9 @@ function runAnalyze() {
     const result = analyze(raw);
     render(result);
     const mapped = result.items.length;
-    setStatus(`Analyzed TH${result.thLvl ?? "?"} · ${mapped} tracked upgrade types`);
+    const eqCount = result.equipment ? result.equipment.length : 0;
+    const scCount = result.supercharges ? result.supercharges.length : 0;
+    setStatus(`Analyzed TH${result.thLvl ?? "?"} · ${mapped} upgrade types · ${eqCount} equipment · ${scCount} supercharge types`);
   } catch (e) {
     setError(e && e.message ? e.message : String(e));
     setStatus("Analysis failed — check the message above.");
@@ -640,7 +973,7 @@ function loadSample() {
       {data:1000089,lvl:2,cnt:2},{data:1000085,lvl:3,cnt:2},{data:1000084,lvl:3,cnt:2},
       {data:1000079,lvl:2},{data:1000067,lvl:6,cnt:2},{data:1000027,lvl:11,cnt:3,timer:432000},
       {data:1000077,lvl:4},{data:1000072,lvl:4,cnt:2},{data:1000011,lvl:17,cnt:5},
-      {data:1000012,lvl:15,cnt:4},{data:1000021,lvl:12,cnt:4},{data:1000019,lvl:16,cnt:5},
+      {data:1000012,lvl:16,cnt:4,supercharge:1},{data:1000021,lvl:13,cnt:4,supercharge:0},{data:1000019,lvl:17,cnt:5,supercharge:2},
       {data:1000013,lvl:17,cnt:4},{data:1000009,lvl:21,cnt:5},{data:1000008,lvl:21,cnt:6},
       {data:1000005,lvl:18,cnt:4},{data:1000003,lvl:18,cnt:4},{data:1000024,lvl:12},
       {data:1000004,lvl:17,cnt:7},{data:1000002,lvl:17,cnt:7},{data:1000023,lvl:11,cnt:3},
@@ -657,6 +990,15 @@ function loadSample() {
     spells:[{data:26000002,lvl:6},{data:26000098,lvl:4},{data:26000070,lvl:4},{data:26000005,lvl:7}],
     pets:[{data:73000000,lvl:15},{data:73000010,lvl:10},{data:73000011,lvl:8},{data:73000016,lvl:9}],
     siege_machines:[{data:4000051,lvl:5},{data:4000092,lvl:5},{data:4000135,lvl:4}],
+    hero_equipment:[
+      {name:"Giant Gauntlet",lvl:21,rarity:"Epic",hero:"Barbarian King",equipped:true},
+      {name:"Rage Vial",lvl:18,rarity:"Common",hero:"Barbarian King"},
+      {name:"Frozen Arrow",lvl:18,rarity:"Epic",hero:"Archer Queen"},
+      {name:"Invisibility Vial",lvl:15,rarity:"Common",hero:"Archer Queen"},
+      {name:"Eternal Tome",lvl:18,rarity:"Common",hero:"Grand Warden"},
+      {name:"Electro Boots",lvl:17,rarity:"Epic",hero:"Royal Champion"}
+    ],
+    resources:{shiny_ore:3420,glowy_ore:410,starry_ore:96},
     guardians:[{data:107000000,lvl:1}]
   };
   app.jsonInput.value = JSON.stringify(sample, null, 2);
@@ -675,6 +1017,18 @@ window.addEventListener("unhandledrejection", function(event) {
   setStatus("A browser script error stopped the analyzer.");
 });
 
+function setupTabs(){
+  const buttons=[...document.querySelectorAll(".tab-btn")];
+  const panels=[...document.querySelectorAll(".tab-panel")];
+  for (const btn of buttons){
+    btn.addEventListener("click",()=>{
+      const target=btn.getAttribute("data-tab");
+      buttons.forEach(b=>b.classList.toggle("active",b===btn));
+      panels.forEach(p=>p.classList.toggle("active",p.id===`tab-${target}`));
+    });
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
   app.jsonInput = document.getElementById("jsonInput");
   app.analyzeBtn = document.getElementById("analyzeBtn");
@@ -689,6 +1043,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   app.analyzeBtn.addEventListener("click", runAnalyze);
   app.sampleBtn.addEventListener("click", loadSample);
+  setupTabs();
   setStatus("Ready. Paste your export or load sample data.");
 });
 
