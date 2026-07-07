@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CoC Upgrade Advisor — Clean Home Village</title>
+<title>CoC Upgrade Advisor — Version 11</title>
 <style>
   :root {
     --bg:#080b12;
@@ -159,8 +159,12 @@
   .ore-input{background:#070b14;border:1px solid var(--border);border-radius:12px;padding:10px;color:var(--text)}
   .ore-input label{display:block;font-size:11px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
   .ore-input input,.ore-input select{width:100%;background:transparent;border:0;color:var(--text);font:inherit;font-weight:800;outline:none}
+  .ore-input input[data-ore-input]{background:rgba(15,23,42,.9);border:1px solid rgba(245,158,11,.35);border-radius:14px;padding:14px 12px;font-size:26px;line-height:1.1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+  .ore-input input[data-ore-input]::placeholder{font-size:14px;color:#fcd34d;opacity:.62;font-weight:800;text-transform:none}
+  .ore-current-note{font-size:12px;color:#cbd5e1;margin-top:8px;line-height:1.35}
   .ore-input button{margin-top:8px;width:100%;font-size:12px;padding:8px 10px}
   .ore-input select option{background:#0f172a;color:#f8fafc}
+  .version-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.09);color:#bbf7d0;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.07em}
   .queue{margin-top:20px}
   .queue-title{font-size:22px;margin-bottom:4px}
   .queue-sub{color:var(--muted);font-size:13px;margin-bottom:14px}
@@ -294,7 +298,7 @@
   </section>
 
   <footer>
-    Version 10: no external photos/images. Uses stable letter badges only, plus equipment ore planner, supercharges, and manual ore inputs. Update <code>ITEMS</code> or rename unknown equipment IDs when Supercell changes exports.
+    Version 12: photos are fully disabled, equipment detection is more aggressive, and you can manually add missing equipment rows when Clash's export does not expose them.
   </footer>
 </div>
 <script>
@@ -555,6 +559,33 @@ function saveEquipmentNameOverride(id,name){
   else delete data[String(id)];
   localStorage.setItem("warRoomEquipmentNames", JSON.stringify(data));
 }
+function loadManualEquipment(){
+  try { return JSON.parse(localStorage.getItem("warRoomManualEquipment") || "[]"); }
+  catch(e){ return []; }
+}
+function saveManualEquipment(rows){
+  localStorage.setItem("warRoomManualEquipment", JSON.stringify(Array.isArray(rows) ? rows : []));
+}
+function normalizeManualEquipmentRow(row){
+  const meta=getEquipmentMetaByName(row?.name);
+  if (!meta) return null;
+  const level=Math.max(1, Math.min(meta.max, Math.floor(num(row?.level) || 1)));
+  return {
+    manualId: String(row?.manualId || (Date.now()+Math.random())),
+    id: null,
+    name: meta.display,
+    level,
+    max: meta.max,
+    rarity: meta.rarity,
+    hero: meta.hero,
+    path: "manual",
+    nameSource: "manual",
+    equipped: false,
+    manual: true,
+    minRecommended: meta.min ?? null,
+    minNote: meta.note || ""
+  };
+}
 function equipmentFallbackName(id, max){
   const kind = Number(max) === 27 ? "Epic equipment" : "Common equipment";
   return Number.isFinite(Number(id)) ? `${kind} ${id}` : kind;
@@ -655,7 +686,7 @@ const DEFAULT_ORE_INCOME = {
   extraShiny:0,
   extraGlowy:0,
   extraStarry:0,
-  oreGoal:"max"
+  oreGoal:"smart"
 };
 function loadOreIncomeSettings(){
   try { return {...DEFAULT_ORE_INCOME, ...(JSON.parse(localStorage.getItem("warRoomOreIncome") || "{}"))}; }
@@ -744,10 +775,18 @@ function equipmentRemainingOreCost(eq, mode){
   for (let lvl=current+1; lvl<=target; lvl++) addOreCost(total, table[lvl] || blankOreCost());
   return {rarity,target,current,total};
 }
+function shouldCountEquipmentInGoal(eq, mode){
+  if (mode === "all" || mode === "max") return true;
+  if (mode === "minimum") return true;
+  // Smart mode: Clash exports can list lots of raw ID level-1 equipment.
+  // Count equipment that is named/mapped or that has actually been upgraded above level 1.
+  return eq?.nameSource !== "fallback" || oreNum(eq?.level,1) > 1;
+}
 function calcEquipmentOreGoal(equipment, mode){
   const total=blankOreCost();
   const rows=[];
   for (const eq of equipment || []){
+    if (!shouldCountEquipmentInGoal(eq, mode)) continue;
     const cost=equipmentRemainingOreCost(eq, mode);
     if (cost.target <= cost.current) continue;
     addOreCost(total,cost.total);
@@ -793,10 +832,10 @@ function monthsText(months){
 }
 function oreTriple(o){ return `${fmtOre(o.shiny)} / ${fmtOre(o.glowy)} / ${fmtOre(o.starry)}`; }
 function renderOreGoalPlanner(equipment, settings, current, monthly){
-  const mode=settings.oreGoal || "max";
+  const mode=settings.oreGoal || "smart";
   const goal=calcEquipmentOreGoal(equipment, mode);
   const timing=oreGoalTiming(goal.total,current,monthly);
-  const label = mode === "minimum" ? "recommended minimums" : "max detected equipment";
+  const label = mode === "minimum" ? "recommended minimums" : (mode === "all" || mode === "max" ? "max every detected equipment row" : "max named/upgraded equipment");
   const bottleneck = timing.bottleneck === "none" ? "none" : `${timing.bottleneck.charAt(0).toUpperCase()}${timing.bottleneck.slice(1)} Ore`;
   const topRows = goal.rows.slice(0,8).map(({eq,cost})=>`
     <div class="rec-card">
@@ -847,7 +886,7 @@ function renderOreIncomeEstimator(root,equipment){
       <summary><span class="cat-name">Income settings</span><span class="cat-count">editable</span><span class="chev">▸</span></summary>
       <div class="rows">
         <div class="ore-inputs">
-          <div class="ore-input"><label>Ore goal</label><select data-income="oreGoal"><option value="max"${settings.oreGoal!=="minimum"?" selected":""}>Max detected equipment</option><option value="minimum"${settings.oreGoal==="minimum"?" selected":""}>Recommended minimums first</option></select></div>
+          <div class="ore-input"><label>Ore goal</label><select data-income="oreGoal"><option value="smart"${(!settings.oreGoal || settings.oreGoal==="smart")?" selected":""}>Max named/upgraded equipment</option><option value="all"${(settings.oreGoal==="all" || settings.oreGoal==="max")?" selected":""}>Max every detected row</option><option value="minimum"${settings.oreGoal==="minimum"?" selected":""}>Recommended minimums first</option></select></div>
           <div class="ore-input"><label>League for star bonus</label><select data-income="league">${leagueOptionsHtml(settings.league)}</select></div>
           <div class="ore-input"><label>Star bonus days/month</label><input data-income="starDays" type="number" min="0" max="31" step="1" value="${esc(settings.starDays)}"></div>
           <div class="ore-input"><label>Regular wars/month</label><input data-income="warsPerMonth" type="number" min="0" max="31" step="1" value="${esc(settings.warsPerMonth)}"></div>
@@ -1028,43 +1067,94 @@ function cleanName(s){ return String(s || "").trim(); }
 function normName(s){ return cleanName(s).toLowerCase().replace(/[_-]+/g," ").replace(/\s+/g," "); }
 function firstDefined(){ for (const v of arguments){ if (v !== undefined && v !== null && v !== "") return v; } return undefined; }
 
+function isEquipmentId(v){
+  const n=Number(v);
+  return Number.isFinite(n) && n >= 90000000 && n < 90001000;
+}
+
 function collectEquipment(json){
   const found=[];
   const seen=new Set();
+  function pushEquipment({idVal,lvlVal,node,path,name="",mappedName="",rarityText="",context={}}){
+    if (!Number.isFinite(lvlVal)) return;
+    const cleanExportName=cleanName(name);
+    const overrides=loadEquipmentNameOverrides();
+    const savedName = Number.isFinite(idVal) ? (overrides[String(idVal)] || "") : "";
+    const idMappedName = Number.isFinite(idVal) ? (EQUIPMENT_ID_NAMES[idVal] || "") : "";
+    const finalMappedName = cleanName(savedName || mappedName || idMappedName);
+    const known=getEquipmentMetaByName(cleanExportName || finalMappedName);
+    const rarityFromLevel = lvlVal > 18 ? "Epic" : "Common";
+    const rarity = known?.rarity || rarityText || rarityFromLevel;
+    const maxFromNode = num(firstDefined(node?.maxLevel,node?.max,node?.cap,node?.max_level));
+    const max = Number.isFinite(maxFromNode) ? maxFromNode : (known?.max || (String(rarity).toLowerCase().includes("epic") ? 27 : 18));
+    const displayName = cleanExportName || finalMappedName || equipmentFallbackName(idVal, max);
+    const hero = known?.hero || cleanName(firstDefined(node?.hero,node?.heroName,node?.assignedHero,context.hero)) || "Hero not mapped";
+    const nameSource = cleanExportName ? "export" : (finalMappedName ? "mapped" : "fallback");
+    const key = `${Number.isFinite(idVal)?idVal:"noid"}|${lvlVal}|${path.join(".")}|${displayName}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    found.push({
+      id:Number.isFinite(idVal)?idVal:null,
+      name:known?.display || displayName,
+      level:Math.max(1, Math.floor(lvlVal)),
+      max,
+      rarity,
+      hero,
+      path:path.join("."),
+      nameSource,
+      equipped:!!node?.equipped || !!node?.active || !!node?.selected,
+      minRecommended:known?.min ?? null,
+      minNote:known?.note || ""
+    });
+  }
   function walk(node,path=[],context={}){
     if (Array.isArray(node)){ node.forEach((n,i)=>walk(n,path.concat(i),context)); return; }
     if (!node || typeof node !== "object") return;
     const pathText=path.join(".").toLowerCase();
-    const inEquipPath=path.some(k=>/equip|gear|blacksmith/i.test(String(k)));
-    const name=cleanName(firstDefined(node.name,node.equipment_name,node.equipmentName,node.itemName,node.label,node.title));
-    const idVal=num(firstDefined(node.data,node.dataId,node.id,node.equipmentId,node.gearId));
-    const lvlVal=num(firstDefined(node.lvl,node.level,node.currentLevel,node.equipmentLevel));
-    const rarityText=cleanName(firstDefined(node.rarity,node.type,node.equipmentRarity));
-    const overrides=loadEquipmentNameOverrides();
-    const mappedName = Number.isFinite(idVal) ? (overrides[String(idVal)] || EQUIPMENT_ID_NAMES[idVal] || "") : "";
-    const nameKey=normName(name || mappedName);
+    const inEquipPath=path.some(k=>/equip|gear|blacksmith|ability/i.test(String(k)));
+    const name=cleanName(firstDefined(node.name,node.equipment_name,node.equipmentName,node.itemName,node.label,node.title,node.displayName));
+    const idVal=num(firstDefined(node.data,node.dataId,node.dataID,node.data_id,node.id,node.csvId,node.csv_id,node.globalId,node.globalID,node.equipmentId,node.equipmentID,node.equipment_id,node.gearId,node.gearID,node.gear_id,node.itemId,node.itemID,node.item_id));
+    let lvlVal=num(firstDefined(node.lvl,node.level,node.currentLevel,node.current_level,node.equipmentLevel,node.equipment_level,node.upgradeLevel,node.upgrade_level,node.value));
+    const rarityText=cleanName(firstDefined(node.rarity,node.type,node.equipmentRarity,node.equipment_rarity));
+    const mappedName = Number.isFinite(idVal) ? (loadEquipmentNameOverrides()[String(idVal)] || EQUIPMENT_ID_NAMES[idVal] || "") : "";
     const known=getEquipmentMetaByName(name || mappedName);
-    const looksLikeEquipment = inEquipPath || !!known || /hero.?equipment|equipment|blacksmith|gear/.test(pathText);
+    const looksLikeEquipmentId=isEquipmentId(idVal);
+    const looksLikeEquipment = looksLikeEquipmentId || inEquipPath || !!known || /hero.?equipment|equipment|blacksmith|gear|ability/.test(pathText);
     if (looksLikeEquipment && Number.isFinite(lvlVal) && (name || Number.isFinite(idVal))){
-      const rarityFromLevel = lvlVal > 18 ? "Epic" : "Common";
-      const rarity = known?.rarity || rarityText || rarityFromLevel;
-      const maxFromNode = num(firstDefined(node.maxLevel,node.max,node.cap));
-      const max = Number.isFinite(maxFromNode) ? maxFromNode : (known?.max || (String(rarity).toLowerCase().includes("epic") ? 27 : 18));
-      const displayName = name || mappedName || equipmentFallbackName(idVal, max);
-      const hero = known?.hero || cleanName(firstDefined(node.hero,node.heroName,node.assignedHero,context.hero)) || "Hero not mapped";
-      const nameSource = name ? "export" : (mappedName ? "mapped" : "fallback");
-      const key = `${displayName}|${lvlVal}|${path.join(".")}`;
-      if (!seen.has(key)){
-        seen.add(key);
-        found.push({id:Number.isFinite(idVal)?idVal:null,name:known?.display || displayName,level:lvlVal,max,rarity,hero,path:path.join("."),nameSource,equipped:!!node.equipped || !!node.active,minRecommended:known?.min ?? null,minNote:known?.note || ""});
+      pushEquipment({idVal,lvlVal,node,path,name,mappedName,rarityText,context});
+    }
+
+    // Some exports can store equipment as an object map, for example:
+    // { "90000035": 1, "90000047": 18 }. Detect those too.
+    for (const k in node){
+      const kid=num(k);
+      const v=node[k];
+      if (isEquipmentId(kid) && (typeof v === "number" || typeof v === "string")){
+        const lv=num(v);
+        if (Number.isFinite(lv) && lv >= 0 && lv <= 27){
+          pushEquipment({idVal:kid,lvlVal:lv,node:{data:kid,lvl:lv},path:path.concat(k),context});
+        }
       }
     }
+
     let nextContext=context;
     if (name && /king|queen|warden|champion|prince|duke/i.test(name)) nextContext={...context,hero:name};
     for (const k in node) walk(node[k],path.concat(k),nextContext);
   }
   walk(json,[]);
+
+  // Manual rows fix the real limitation: some Clash exports do not expose every equipment item,
+  // or only expose raw IDs without names. These user-added rows are saved locally.
+  const normalizedManual=loadManualEquipment().map(normalizeManualEquipmentRow).filter(Boolean);
+  const detectedNamed=new Set(found.filter(e=>e.nameSource!=="fallback").map(e=>normName(e.name)));
+  for (const m of normalizedManual){
+    if (!detectedNamed.has(normName(m.name))){
+      found.push(m);
+    }
+  }
+
   found.sort((a,b)=>{
+    if (!!a.manual !== !!b.manual) return a.manual ? 1 : -1;
     const aDone=a.level>=a.max, bDone=b.level>=b.max;
     if (aDone!==bDone) return aDone?1:-1;
     if ((b.max-b.level)!==(a.max-a.level)) return (b.max-b.level)-(a.max-a.level);
@@ -1246,6 +1336,61 @@ function renderEquipmentMinimums(equipment){
   el.innerHTML=html;
 }
 
+function equipmentManualSelectHtml(id="manualAdd", currentName=""){
+  const choices=canonicalEquipmentChoices();
+  const current=normName(currentName);
+  let html=`<select data-manual-equipment-name="${esc(id)}"><option value="">Choose equipment to add...</option>`;
+  let lastHero="";
+  for (const c of choices){
+    if (lastHero && lastHero!==c.hero) html += `<option disabled>──────────</option>`;
+    lastHero=c.hero;
+    const selected=current && current===normName(c.name) ? " selected" : "";
+    html += `<option value="${esc(c.name)}"${selected}>${esc(c.hero)} - ${esc(c.name)} (${esc(c.rarity)})</option>`;
+  }
+  html += `</select>`;
+  return html;
+}
+
+function renderManualEquipmentManager(root,equipment){
+  const el=root.querySelector("#manualEquipmentManager");
+  if (!el) return;
+  const manual=loadManualEquipment().map(normalizeManualEquipmentRow).filter(Boolean);
+  const manualRows=manual.map(m=>`<div class="rec-card"><div class="rec-title">${iconMarkup(m.name,m.max)}<span>${esc(m.name)}</span></div><div class="rec-sub">${esc(m.hero)} - ${esc(m.rarity)} - level ${m.level}/${m.max}</div><button type="button" data-manual-remove="${esc(m.manualId)}">Remove</button></div>`).join("");
+  el.innerHTML=`
+    <div class="rec-head"><h3>Missing equipment?</h3><div class="equip-meta">If Clash's export did not detect something, add it manually here. Manual rows save in this browser and are included in the ore planner.</div></div>
+    <div class="equip-editor">
+      ${equipmentManualSelectHtml("manualAdd")}
+      <input data-manual-equipment-level inputmode="numeric" type="number" min="1" max="27" step="1" value="1" placeholder="level">
+      <button type="button" data-manual-add>Add equipment</button>
+    </div>
+    <div class="hintline">This is the safety net for gear that does not show up in your JSON. Pick the equipment name and type its current level.</div>
+    ${manualRows ? `<div class="rec-grid" style="margin-top:12px">${manualRows}</div>` : `<div class="equip-meta" style="margin-top:10px">No manual equipment added yet.</div>`}`;
+  const add=el.querySelector("[data-manual-add]");
+  if (add){
+    add.addEventListener("click",()=>{
+      const name=el.querySelector("[data-manual-equipment-name]")?.value || "";
+      const meta=getEquipmentMetaByName(name);
+      if (!meta){ setStatus("Choose an equipment name first"); return; }
+      const level=Math.max(1, Math.min(meta.max, Math.floor(num(el.querySelector("[data-manual-equipment-level]")?.value) || 1)));
+      const rows=loadManualEquipment();
+      rows.push({manualId:String(Date.now()),name:meta.display,level});
+      saveManualEquipment(rows);
+      const raw=document.getElementById("jsonInput")?.value?.trim();
+      if (raw) render(analyze(raw));
+      setStatus(`Added manual equipment: ${meta.display}`);
+    });
+  }
+  el.querySelectorAll("[data-manual-remove]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const id=btn.getAttribute("data-manual-remove");
+      saveManualEquipment(loadManualEquipment().filter(r=>String(r.manualId)!==String(id)));
+      const raw=document.getElementById("jsonInput")?.value?.trim();
+      if (raw) render(analyze(raw));
+      setStatus("Removed manual equipment");
+    });
+  });
+}
+
 function renderEquipmentTab(equipment, oreData){
   window.__warRoomCurrentEquipment = equipment || [];
   const summary=document.getElementById("equipmentSummary");
@@ -1265,6 +1410,7 @@ function renderEquipmentTab(equipment, oreData){
     starry: displayOreValue("starry", detectedOres.starry)
   };
   summary.innerHTML=`
+    <div class="notice" style="display:block"><span class="version-pill">Version 12</span> Photos are disabled in this file. Equipment is detected from equipment/gear fields plus raw 900000xx IDs, and you can manually add any missing gear below.</div>
     <div class="stat-grid">
       <div class="stat-card"><div class="label">Equipment found</div><div class="big">${total}</div><div class="small">From equipment/gear fields in your JSON</div></div>
       <div class="stat-card"><div class="label">Maxed</div><div class="big">${maxed}/${total || 0}</div><div class="small">Common cap 18, Epic cap 27</div></div>
@@ -1277,12 +1423,12 @@ function renderEquipmentTab(equipment, oreData){
       <div class="equip-meta">Enter your current ore balances. These save automatically on this browser and power the monthly estimate.</div>
     </div>
     <div class="ore-inputs">
-      <div class="ore-input"><label>Shiny Ore</label><input data-ore-input="shiny" inputmode="numeric" type="number" min="0" step="1" value="${esc(oreValue.shiny || "")}" placeholder="type how much you have"><div class="small">${detectedOres.shiny != null ? `Export detected: ${fmtOre(detectedOres.shiny)}` : `Export did not include this ore.`}</div></div>
-      <div class="ore-input"><label>Glowy Ore</label><input data-ore-input="glowy" inputmode="numeric" type="number" min="0" step="1" value="${esc(oreValue.glowy || "")}" placeholder="type how much you have"><div class="small">${detectedOres.glowy != null ? `Export detected: ${fmtOre(detectedOres.glowy)}` : `Export did not include this ore.`}</div></div>
-      <div class="ore-input"><label>Starry Ore</label><input data-ore-input="starry" inputmode="numeric" type="number" min="0" step="1" value="${esc(oreValue.starry || "")}" placeholder="type how much you have"><div class="small">${detectedOres.starry != null ? `Export detected: ${fmtOre(detectedOres.starry)}` : `Export did not include this ore.`}</div></div>
+      <div class="ore-input"><label>Shiny Ore current balance</label><input data-ore-input="shiny" inputmode="numeric" type="number" min="0" step="1" value="${esc(oreValue.shiny !== "" ? oreValue.shiny : "")}" placeholder="0"><div class="ore-current-note">Tap this box and type how much Shiny Ore you have. ${detectedOres.shiny != null ? `Export detected: ${fmtOre(detectedOres.shiny)}` : `Export did not include this ore.`}</div></div>
+      <div class="ore-input"><label>Glowy Ore current balance</label><input data-ore-input="glowy" inputmode="numeric" type="number" min="0" step="1" value="${esc(oreValue.glowy !== "" ? oreValue.glowy : "")}" placeholder="0"><div class="ore-current-note">Tap this box and type how much Glowy Ore you have. ${detectedOres.glowy != null ? `Export detected: ${fmtOre(detectedOres.glowy)}` : `Export did not include this ore.`}</div></div>
+      <div class="ore-input"><label>Starry Ore current balance</label><input data-ore-input="starry" inputmode="numeric" type="number" min="0" step="1" value="${esc(oreValue.starry !== "" ? oreValue.starry : "")}" placeholder="0"><div class="ore-current-note">Tap this box and type how much Starry Ore you have. ${detectedOres.starry != null ? `Export detected: ${fmtOre(detectedOres.starry)}` : `Export did not include this ore.`}</div></div>
     </div>
     <div class="notice" style="display:block">Your export does not always include ore balances or equipment names. Type your ores here and choose names for equipment IDs once; both save in this browser.</div>
-    <div id="oreIncomeEstimator" class="equip-card" style="margin-top:14px"></div>`;
+    <div id="oreIncomeEstimator" class="equip-card" style="margin-top:14px"></div><div id="manualEquipmentManager" class="equip-card" style="margin-top:14px"></div>`;
   const saveTypedOres = () => {
     const manual={};
     summary.querySelectorAll("[data-ore-input]").forEach(input=>{
@@ -1298,10 +1444,11 @@ function renderEquipmentTab(equipment, oreData){
     input.addEventListener("change", () => { saveTypedOres(); setStatus("Saved ore values on this browser"); });
   });
   renderOreIncomeEstimator(summary,equipment);
+  renderManualEquipmentManager(summary,equipment);
 
   listEl.innerHTML=`<div class="rec-head"><h3>Your detected equipment</h3><div class="equip-meta">These are the actual equipment entries from your export. Pick a name for any ID-only row and the guide below will start matching it.</div></div>`;
   if (!equipment.length){
-    listEl.innerHTML=`<div class="equip-card"><div class="equip-name">No equipment entries found</div><div class="equip-meta">Your export may not expose equipment, or it may use a new field name. Paste an export/API JSON that contains hero equipment and this tab will list it.</div></div>`;
+    listEl.innerHTML=`<div class="equip-card"><div class="equip-name">No equipment entries found</div><div class="equip-meta">Your export may not expose equipment, or it may use a new field name. Use the Missing equipment box above to add gear manually; it will still count in the ore planner.</div></div>`;
     return;
   }
   for (const eq of equipment){
