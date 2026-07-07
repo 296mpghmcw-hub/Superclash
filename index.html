@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Superclash Planner - Version 15</title>
+<title>Superclash Planner - Version 16</title>
 <style>
   :root {
     --bg:#080b12; --bg2:#0d1320; --card:#131a2a; --card2:#171f31; --line:rgba(148,163,184,.18);
@@ -44,16 +44,33 @@
   .source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}@media(max-width:900px){.source-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:580px){.source-grid{grid-template-columns:1fr}}
   .source-card{border:1px solid var(--line);background:rgba(9,13,23,.44);border-radius:16px;padding:14px;display:grid;gap:10px}.source-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.source-name{font-weight:950}.source-toggle{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;font-weight:900;text-transform:none;letter-spacing:0}.source-toggle input{width:auto;accent-color:var(--accent)}.ore-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ore-fields label{font-size:10px}.ore-fields input{padding:9px 8px;text-align:center;font-weight:900}.source-total{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:12px}.ore-chip{border:1px solid var(--line);border-radius:999px;padding:4px 8px;background:rgba(148,163,184,.08)}
 
+  .auth-card{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .auth-left{display:grid;gap:4px}.auth-title{font-weight:950}.auth-sub{color:var(--muted);font-size:13px}
+  .auth-actions{display:flex;gap:8px;flex-wrap:wrap}.auth-actions .btn{padding:10px 13px;border-radius:12px;font-size:13px}
+  .auth-dot{width:10px;height:10px;border-radius:50%;background:var(--muted2);display:inline-block;margin-right:6px}.auth-dot.on{background:var(--accent2)}
+
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="hero"><div class="topline"><div class="brand"><div class="logo">SC</div><div><h1>Superclash Planner</h1><p class="sub">Clean version: village upgrades from your export, equipment levels entered manually, ores/month planner, and supercharges. No photos, no raw equipment ID clutter.</p></div></div><div class="version">Version 15 - ore source cards</div></div></header>
+  <header class="hero"><div class="topline"><div class="brand"><div class="logo">SC</div><div><h1>Superclash Planner</h1><p class="sub">Clean version: village upgrades from your export, manual equipment levels, ores/month planner, cloud save, and supercharges. No photos, no raw equipment ID clutter.</p></div></div><div class="version">Version 16 - accounts + cloud save</div></div></header>
+  <section class="card soft auth-card" id="authPanel">
+    <div class="auth-left">
+      <div class="auth-title"><span class="auth-dot" id="authDot"></span><span id="authTitle">Not signed in</span></div>
+      <div class="auth-sub" id="authSub">Browser saves still work. Sign in to sync equipment, ores, source cards, and your last export across devices.</div>
+    </div>
+    <div class="auth-actions">
+      <button class="btn" id="signInBtn" type="button">Sign in with Google</button>
+      <button class="btn secondary" id="cloudSaveBtn" type="button" disabled>Save to cloud</button>
+      <button class="btn secondary" id="cloudLoadBtn" type="button" disabled>Load from cloud</button>
+      <button class="btn secondary" id="signOutBtn" type="button" style="display:none">Sign out</button>
+    </div>
+  </section>
   <nav class="tabs" aria-label="Planner tabs"><button class="tab active" data-panel="village">Village upgrades</button><button class="tab" data-panel="equipment">Equipment + ores</button><button class="tab" data-panel="supercharges">Supercharges</button></nav>
   <section class="panel active" id="panel-village"><div class="card"><div class="section-title">Paste your Clash export</div><p class="section-sub">This only reads Home Village upgrade data. Equipment is now manual-only to avoid bad or missing export detection.</p><textarea id="jsonInput" placeholder='Paste your Clash of Clans Data Export JSON here'></textarea><div class="row" style="margin-top:12px"><button class="btn" id="analyzeBtn">Analyze village</button><button class="btn secondary" id="sampleBtn">Load sample</button></div><div id="status" class="notice" style="display:none"></div></div><div id="villageResults" style="display:none"><div class="stat-grid"><div class="stat"><div class="label">Town Hall</div><div class="value" id="thValue">?</div><div class="hint" id="thHint"></div></div><div class="stat"><div class="label">Progress</div><div class="value" id="progressValue">0%</div><div class="hint">Mapped upgrade types only</div></div><div class="stat"><div class="label">Maxed types</div><div class="value" id="maxedValue">0/0</div><div class="hint">Tracked item categories</div></div><div class="stat"><div class="label">Running</div><div class="value" id="runningValue">0</div><div class="hint">Upgrades with timers</div></div></div><div class="card"><div class="section-title">Next upgrades</div><p class="section-sub">Short priority list only. The detailed categories are tucked below.</p><div id="queueList" class="queue"></div></div><div id="categoryList"></div></div></section>
   <section class="panel" id="panel-equipment"><div class="card"><div class="section-title">Manual equipment levels</div><p class="section-sub">Type your current level for each equipment. Use <b>0</b> or leave blank for gear you do not own or do not want counted.</p><div class="row"><button class="btn secondary" id="clearGearBtn">Clear all equipment levels</button></div><div id="equipmentManualList"></div></div><div class="card"><div class="section-title">Current ores</div><p class="section-sub">Type how much ore you have right now. These save automatically on this browser.</p><div class="grid three"><label>Shiny Ore<input type="number" min="0" step="1" id="oreShiny" placeholder="type amount"></label><label>Glowy Ore<input type="number" min="0" step="1" id="oreGlowy" placeholder="type amount"></label><label>Starry Ore<input type="number" min="0" step="1" id="oreStarry" placeholder="type amount"></label></div></div><div class="card"><div class="section-title">Ore tracker sources</div><p class="section-sub">Monthly gain cards like Clashify. Edit the totals for each source and turn off anything you do not use.</p><div class="grid two"><label>Goal<select id="oreGoal"><option value="max">Max all entered equipment</option><option value="minimum">Recommended minimums first</option></select></label><div class="row" style="align-items:end"><button class="btn secondary" id="resetOreSourcesBtn" type="button">Reset source values</button></div></div><div id="oreSourceGrid" class="source-grid"></div></div><div class="card"><div class="section-title">Finish estimate</div><p class="section-sub">Uses your current ore balance, the source cards above, and the manual equipment levels.</p><div id="orePlannerResults"></div></div></section>
   <section class="panel" id="panel-supercharges"><div class="card"><div class="section-title">Supercharges</div><p class="section-sub">Analyze your village first. This shows eligible max-level buildings and any charge levels exposed in the export. If the export does not expose charge fields, it assumes charge 0.</p><div id="superchargeResults" class="queue"></div></div></section>
-  <footer>Version 15. No external images. Manual equipment levels plus Clashify-style monthly ore source cards.</footer>
+  <footer>Version 16. No external images. Manual equipment levels, Clashify-style ore source cards, and optional Firebase cloud save.</footer>
 </div>
 <script>
 "use strict";
@@ -381,5 +398,126 @@ function renderOrePlanner(){const settings=loadOreSettings(); const monthly=calc
 let lastVillageResult=null; function switchPanel(id){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.panel===id));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id===`panel-${id}`));}
 document.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchPanel(b.dataset.panel))); const last=localStorage.getItem("warRoomLastExport"); if(last) $("jsonInput").value=last; $("analyzeBtn").addEventListener("click",()=>{try{renderVillage(analyzeVillage($("jsonInput").value.trim()));}catch(e){setStatus(e.message,true);}}); $("sampleBtn").addEventListener("click",()=>{$("jsonInput").value=JSON.stringify({tag:"#SAMPLE",buildings:[{data:1000001,lvl:18},{data:1000071,lvl:12},{data:1000007,lvl:15},{data:1000000,lvl:13,cnt:4},{data:1000012,lvl:16,cnt:4,supercharge:1}],heroes:[{data:28000000,lvl:97},{data:28000001,lvl:97},{data:28000002,lvl:70},{data:28000004,lvl:45},{data:28000006,lvl:80}],units:[{data:4000008,lvl:12}],spells:[{data:26000002,lvl:6}],pets:[{data:73000010,lvl:10}]},null,2); renderVillage(analyzeVillage($("jsonInput").value));}); renderEquipmentInputs(); renderOreControls(); renderOrePlanner(); renderSupercharges([]); $("clearGearBtn").addEventListener("click",()=>{if(confirm("Clear all manually entered equipment levels?")){saveGearLevels({});renderEquipmentInputs();renderOrePlanner();}}); if(last){try{renderVillage(analyzeVillage(last));}catch(e){}}});
 </script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBPb9aZd9D2l3DOvuJ80W2YjTmlAcgRW3Y",
+  authDomain: "superclash-3adce.firebaseapp.com",
+  projectId: "superclash-3adce",
+  storageBucket: "superclash-3adce.firebasestorage.app",
+  messagingSenderId: "431111804617",
+  appId: "1:431111804617:web:f139e167fed89761eadf18",
+  measurementId: "G-0ZKVGDJBWG"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+let currentUser = null;
+
+const $id = (id) => document.getElementById(id);
+const SAVE_KEYS = ["warRoomLastExport", "scManualGearLevels", "scManualOres", "scOreSettings", "scOreSources"];
+
+function getLocalSavePayload(){
+  const data = {};
+  SAVE_KEYS.forEach(k => data[k] = localStorage.getItem(k) || "");
+  const jsonInput = $id("jsonInput");
+  if(jsonInput && jsonInput.value.trim()) data.warRoomLastExport = jsonInput.value.trim();
+  return { version: 16, updatedAt: serverTimestamp(), data };
+}
+
+function applyCloudPayload(payload){
+  if(!payload || !payload.data) throw new Error("No cloud save data found.");
+  SAVE_KEYS.forEach(k => {
+    const v = payload.data[k];
+    if(typeof v === "string" && v.length) localStorage.setItem(k, v);
+    else localStorage.removeItem(k);
+  });
+  location.href = location.pathname + "?v=16-cloud-" + Date.now();
+}
+
+function userSaveRef(){
+  if(!currentUser) throw new Error("Sign in first.");
+  return doc(db, "users", currentUser.uid, "saves", "main");
+}
+
+function updateAuthUI(user){
+  currentUser = user || null;
+  const signedIn = !!currentUser;
+  $id("authDot")?.classList.toggle("on", signedIn);
+  if($id("authTitle")) $id("authTitle").textContent = signedIn ? `Signed in as ${currentUser.displayName || currentUser.email || "Google user"}` : "Not signed in";
+  if($id("authSub")) $id("authSub").textContent = signedIn ? "Cloud save is ready. Browser auto-save still works as a backup." : "Browser saves still work. Sign in to sync equipment, ores, source cards, and your last export across devices.";
+  if($id("signInBtn")) $id("signInBtn").style.display = signedIn ? "none" : "inline-block";
+  if($id("signOutBtn")) $id("signOutBtn").style.display = signedIn ? "inline-block" : "none";
+  if($id("cloudSaveBtn")) $id("cloudSaveBtn").disabled = !signedIn;
+  if($id("cloudLoadBtn")) $id("cloudLoadBtn").disabled = !signedIn;
+}
+
+function toast(msg, isError=false){
+  const status = $id("status");
+  if(status){
+    status.style.display = "block";
+    status.className = isError ? "notice error" : "notice";
+    status.textContent = msg;
+  } else {
+    alert(msg);
+  }
+}
+
+async function handleSignIn(){
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (err) {
+    if(err && (err.code === "auth/popup-blocked" || err.code === "auth/cancelled-popup-request" || err.code === "auth/popup-closed-by-user")){
+      if(err.code === "auth/popup-closed-by-user") return;
+      await signInWithRedirect(auth, provider);
+    } else {
+      toast("Sign-in failed: " + (err.message || err), true);
+    }
+  }
+}
+
+async function handleCloudSave(){
+  if(!currentUser) return toast("Sign in first.", true);
+  try {
+    await setDoc(userSaveRef(), getLocalSavePayload(), { merge: true });
+    toast("Saved to cloud.");
+  } catch (err) {
+    toast("Cloud save failed. Check Firestore rules and authorized domain. " + (err.message || err), true);
+  }
+}
+
+async function handleCloudLoad(){
+  if(!currentUser) return toast("Sign in first.", true);
+  try {
+    const snap = await getDoc(userSaveRef());
+    if(!snap.exists()) return toast("No cloud save found yet. Save once first.", true);
+    if(confirm("Load cloud save and replace this browser's current Superclash settings?")){
+      applyCloudPayload(snap.data());
+    }
+  } catch (err) {
+    toast("Cloud load failed. " + (err.message || err), true);
+  }
+}
+
+async function handleSignOut(){
+  await signOut(auth);
+  toast("Signed out. Browser save still stays on this device.");
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  $id("signInBtn")?.addEventListener("click", handleSignIn);
+  $id("cloudSaveBtn")?.addEventListener("click", handleCloudSave);
+  $id("cloudLoadBtn")?.addEventListener("click", handleCloudLoad);
+  $id("signOutBtn")?.addEventListener("click", handleSignOut);
+  try { await getRedirectResult(auth); } catch(err) { toast("Redirect sign-in failed: " + (err.message || err), true); }
+  onAuthStateChanged(auth, updateAuthUI);
+});
+</script>
+
 </body>
 </html>
