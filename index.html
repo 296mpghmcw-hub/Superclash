@@ -152,7 +152,7 @@
     <div class="hero-card">
       <div class="kicker">TH17/TH18 Upgrade Advisor</div>
       <h1><span class="gradient">CoC Upgrade Tracker</span></h1>
-      <p class="sub">Paste your village export and get a modern, TH-aware breakdown. This version shows errors on-screen, tracks lab/pets/siege correctly, and lists unknown Data Export IDs instead of hiding them.</p>
+      <p class="sub">Paste your village export and get a modern, TH-aware Home Village upgrade breakdown. This version ignores Builder Base and side-system IDs so the unmapped list stays useful.</p>
       <div class="header-actions">
         <span class="pill">No cursive fonts</span>
         <span class="pill">Safer button handling</span>
@@ -188,7 +188,7 @@
       </div>
       <div class="mini">
         <div class="label">Accuracy note</div>
-        <div class="value">Known Data Export IDs are tracked. Brand-new or unmapped IDs show at the bottom so they can be added later.</div>
+        <div class="value">Only Home Village data is analyzed. Builder Base, helpers, guardians, and decoration IDs are ignored so they do not spam the unmapped list.</div>
       </div>
     </aside>
   </main>
@@ -226,7 +226,7 @@
    Main fixes:
    1) max levels are Town-Hall-aware: maxByTh: {17:x, 18:y}
    2) lab/pet/siege entries now have max caps, so they don't fake 100%
-   3) unknown IDs are displayed at the bottom instead of silently ignored
+   3) Builder Base and side-system IDs are filtered out
    ===================================================================== */
 
 const ITEMS = {
@@ -416,14 +416,29 @@ function harvest(node,out,path=[]){
   }
 }
 
+/*
+  Important: the in-game export also contains Builder Base and other side systems.
+  The first fixed version recursively read EVERYTHING, which is why you saw tons of
+  "Unknown data ID" rows from buildings2 / units2 / helpers / guardians.
+  This analyzer is intentionally Home Village only.
+*/
+const HOME_EXPORT_ROOTS = ["buildings", "heroes", "units", "spells", "pets", "traps"];
+function harvestHomeVillage(json,out){
+  for (const root of HOME_EXPORT_ROOTS){
+    if (json && Object.prototype.hasOwnProperty.call(json, root)) harvest(json[root], out, [root]);
+  }
+  // Fallback for unusual exports, but normal Data Export should use the roots above.
+  if (!out.length) harvest(json,out,[]);
+}
+
 function analyze(raw){
   let json;
   try { json = JSON.parse(raw); }
   catch(e){ throw new Error("That doesn't parse as JSON. Make sure you copied the whole export from Data Export → Copy."); }
 
   const entries=[];
-  harvest(json,entries);
-  if (!entries.length) throw new Error("Parsed the JSON but found no {data, lvl} entries. Double-check the export copy.");
+  harvestHomeVillage(json,entries);
+  if (!entries.length) throw new Error("Parsed the JSON but found no Home Village {data, lvl} entries. Double-check the export copy.");
 
   const byId=new Map();
   for (const e of entries){
@@ -503,7 +518,7 @@ function render(result){
   const unknownNotice=document.getElementById("unknownNotice");
   if (unknowns.length){
     unknownNotice.style.display="block";
-    unknownNotice.textContent=`Found ${unknowns.length} unmapped data ID${unknowns.length>1?"s":""}. This usually means newer items, hero equipment, helpers, guardians, decorations, or IDs missing from the public mapping. They are shown at the bottom instead of ignored.`;
+    unknownNotice.textContent=`Found ${unknowns.length} unmapped data ID${unknowns.length>1?"s":""}. This usually means a brand-new Home Village item or an ID missing from the mapping. They are shown at the bottom instead of ignored.`;
   } else unknownNotice.style.display="none";
 
   const q=buildQueue(items);
