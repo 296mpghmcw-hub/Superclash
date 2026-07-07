@@ -122,6 +122,29 @@
   .stat-card .small{font-size:12px;color:var(--muted);margin-top:3px}
   .equipment-grid{display:grid;gap:10px;margin-top:14px}
   .equip-card,.super-card{background:var(--card-solid);border:1px solid var(--border);border-radius:16px;padding:14px;display:grid;gap:8px}
+  .asset-line{display:flex;align-items:center;gap:10px;min-width:0}
+  .asset-thumb{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,rgba(124,58,237,.26),rgba(34,197,94,.12));border:1px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+  .asset-thumb img{width:100%;height:100%;object-fit:contain;display:block;padding:3px}
+  .asset-thumb span{display:none;font-size:13px;font-weight:900;color:#ddd6fe;text-align:center}
+  .asset-thumb.fallback img{display:none}
+  .asset-thumb.fallback span{display:grid}
+  .row .asset-thumb{width:34px;height:34px;border-radius:11px}
+  .row .asset-line{min-width:0}
+  .equip-rec{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+  .equip-rec strong{color:#fef3c7}
+  .equip-warning{color:#fecdd3;font-size:12px;font-weight:750}
+  .equip-ok{color:#bbf7d0;font-size:12px;font-weight:750}
+  .equip-editor{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .equip-editor input{flex:1;min-width:190px;background:#070b14;border:1px solid var(--border);border-radius:12px;color:var(--text);padding:10px 11px;font:inherit;font-size:13px;outline:none}
+  .equip-editor button{background:rgba(124,58,237,.22);border:1px solid rgba(196,181,253,.28);border-radius:12px;color:#ede9fe;padding:10px 12px;font-weight:800;cursor:pointer}
+  .hintline{font-size:12px;color:var(--muted2)}
+  .rec-head{margin-top:16px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .rec-head h3{font-size:17px;letter-spacing:-.025em}
+  .rec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:10px}
+  .rec-card{background:rgba(15,23,42,.56);border:1px solid var(--border);border-radius:15px;padding:12px;display:grid;gap:7px}
+  .rec-card .rec-title{display:flex;align-items:center;gap:9px;font-weight:850}
+  .rec-card .rec-sub{font-size:12px;color:var(--muted);font-family:"SFMono-Regular",Consolas,monospace}
+  .rec-card .rec-note{font-size:12px;color:#cbd5e1;line-height:1.4}
   .equip-top,.super-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
   .equip-name,.super-name{font-weight:850;letter-spacing:-.015em}
   .equip-meta,.super-meta{font-family:"SFMono-Regular",Consolas,monospace;font-size:12px;color:var(--muted)}
@@ -176,7 +199,7 @@
     <div class="hero-card">
       <div class="kicker">TH17/TH18 Upgrade Advisor</div>
       <h1><span class="gradient">CoC Upgrade Tracker</span></h1>
-      <p class="sub">Paste your village export and get a modern, TH-aware Home Village upgrade breakdown. This clean version ignores Builder Base, helpers, equipment, decorations, and other side-system IDs.</p>
+      <p class="sub">Paste your village export and get a modern, TH-aware Home Village upgrade breakdown. This clean version tracks Home Village upgrades, equipment, ores, and supercharges while ignoring Builder Base, helpers, decorations, and side-system IDs.</p>
       <div class="header-actions">
         <span class="pill">No cursive fonts</span>
         <span class="pill">Safer button handling</span>
@@ -212,7 +235,7 @@
       </div>
       <div class="mini">
         <div class="label">Accuracy note</div>
-        <div class="value">Only Home Village upgrade data is analyzed. Builder Base, helpers, guardians, equipment, and decoration IDs are ignored so they do not clutter the results.</div>
+        <div class="value">Home Village upgrades, equipment, ores, and supercharges are analyzed. Builder Base, helpers, guardians, and decoration IDs are ignored so they do not clutter the results.</div>
       </div>
     </aside>
   </main>
@@ -249,6 +272,7 @@
         <div class="queue-title">Equipment and ores</div>
         <div class="queue-sub">Tracks equipment levels if your export includes equipment data. Ore balances are detected when the export exposes ore fields.</div>
         <div id="equipmentSummary"></div>
+        <div id="equipmentRecommendations"></div>
         <div id="equipmentList" class="equipment-grid"></div>
       </div>
     </div>
@@ -264,7 +288,7 @@
   </section>
 
   <footer>
-    Fixed modern version. Update the <code>ITEMS</code> table when Supercell adds new Data Export IDs.
+    Modern version with tabs, equipment minimum targets, Supercharges, and image thumbnails. Update <code>ITEMS</code> or rename unknown equipment IDs when Supercell changes exports.
   </footer>
 </div>
 <script>
@@ -436,52 +460,99 @@ const CATS = [
 
 // Equipment max caps: Common = 18, Epic = 27. These names are from Clash Ninja's current equipment list.
 const EQUIPMENT_META = {
-  "barbarian puppet":{hero:"Barbarian King",rarity:"Common",max:18},
-  "rage vial":{hero:"Barbarian King",rarity:"Common",max:18},
-  "earthquake boots":{hero:"Barbarian King",rarity:"Common",max:18},
-  "vampstache":{hero:"Barbarian King",rarity:"Common",max:18},
-  "giant gauntlet":{hero:"Barbarian King",rarity:"Epic",max:27},
-  "spiky ball":{hero:"Barbarian King",rarity:"Epic",max:27},
-  "snake bracelet":{hero:"Barbarian King",rarity:"Epic",max:27},
-  "stick horse":{hero:"Barbarian King",rarity:"Epic",max:27},
-  "archer puppet":{hero:"Archer Queen",rarity:"Common",max:18},
-  "invisibility vial":{hero:"Archer Queen",rarity:"Common",max:18},
-  "giant arrow":{hero:"Archer Queen",rarity:"Common",max:18},
-  "healer puppet":{hero:"Archer Queen",rarity:"Common",max:18},
-  "frozen arrow":{hero:"Archer Queen",rarity:"Epic",max:27},
-  "magic mirror":{hero:"Archer Queen",rarity:"Epic",max:27},
-  "action figure":{hero:"Archer Queen",rarity:"Epic",max:27},
-  "monolith arrow":{hero:"Archer Queen",rarity:"Epic",max:27},
-  "eternal tome":{hero:"Grand Warden",rarity:"Common",max:18},
-  "life gem":{hero:"Grand Warden",rarity:"Common",max:18},
-  "healing tome":{hero:"Grand Warden",rarity:"Common",max:18},
-  "rage gem":{hero:"Grand Warden",rarity:"Common",max:18},
-  "fireball":{hero:"Grand Warden",rarity:"Epic",max:27},
-  "lavaloon puppet":{hero:"Grand Warden",rarity:"Epic",max:27},
-  "heroic torch":{hero:"Grand Warden",rarity:"Epic",max:27},
-  "royal gem":{hero:"Royal Champion",rarity:"Common",max:18},
-  "seeking shield":{hero:"Royal Champion",rarity:"Common",max:18},
-  "hog rider puppet":{hero:"Royal Champion",rarity:"Common",max:18},
-  "haste vial":{hero:"Royal Champion",rarity:"Common",max:18},
-  "rocket spear":{hero:"Royal Champion",rarity:"Epic",max:27},
-  "electro boots":{hero:"Royal Champion",rarity:"Epic",max:27},
-  "frost flake":{hero:"Royal Champion",rarity:"Epic",max:27},
-  "dark orb":{hero:"Minion Prince",rarity:"Common",max:18},
-  "henchmen puppet":{hero:"Minion Prince",rarity:"Common",max:18},
-  "metal pants":{hero:"Minion Prince",rarity:"Common",max:18},
-  "noble iron":{hero:"Minion Prince",rarity:"Common",max:18},
-  "dark crown":{hero:"Minion Prince",rarity:"Epic",max:27},
-  "meteor staff":{hero:"Minion Prince",rarity:"Epic",max:27},
-  "fire heart":{hero:"Minion Prince",rarity:"Epic",max:27},
-  "flame blower":{hero:"Dragon Duke",rarity:"Common",max:18},
-  "stun blaster":{hero:"Dragon Duke",rarity:"Common",max:18},
-  "electro fangs":{hero:"Dragon Duke",rarity:"Common",max:18},
-  "rocket backpack":{hero:"Dragon Duke",rarity:"Epic",max:27}
+  "barbarian puppet":{display:"Barbarian Puppet",hero:"Barbarian King",rarity:"Common",max:18,min:9,note:"Low priority; level only if you actually use it."},
+  "rage vial":{display:"Rage Vial",hero:"Barbarian King",rarity:"Common",max:18,min:12,note:"Good early King value; push higher if it is part of your main army."},
+  "earthquake boots":{display:"Earthquake Boots",hero:"Barbarian King",rarity:"Common",max:18,min:1,note:"Usable at level 1 for wall opening; max if you pair it with Spiky Ball."},
+  "vampstache":{display:"Vampstache",hero:"Barbarian King",rarity:"Common",max:18,min:9,note:"Niche/sustain option; not a top ore priority at TH17/TH18."},
+  "giant gauntlet":{display:"Giant Gauntlet",hero:"Barbarian King",rarity:"Epic",max:27,min:18,note:"Strong tank/core-dive breakpoint."},
+  "spiky ball":{display:"Spiky Ball",hero:"Barbarian King",rarity:"Epic",max:27,min:18,note:"Very high priority; push beyond 18 if it is your main King equipment."},
+  "snake bracelet":{display:"Snake Bracelet",hero:"Barbarian King",rarity:"Epic",max:27,min:18,note:"Strong funnel/tank breakpoint; 21+ is a premium goal."},
+  "stick horse":{display:"Stick Horse",hero:"Barbarian King",rarity:"Epic",max:27,min:15,note:"Use 15 as a practical epic baseline until you commit ores."},
+
+  "archer puppet":{display:"Archer Puppet",hero:"Archer Queen",rarity:"Common",max:18,min:9,note:"Low priority; usually replaced by stronger Queen gear."},
+  "invisibility vial":{display:"Invisibility Vial",hero:"Archer Queen",rarity:"Common",max:18,min:12,note:"Still useful; 12+ is a practical floor."},
+  "giant arrow":{display:"Giant Arrow",hero:"Archer Queen",rarity:"Common",max:18,min:15,note:"Aim 15+; higher if using it to snipe same-TH Air Defenses."},
+  "healer puppet":{display:"Healer Puppet",hero:"Archer Queen",rarity:"Common",max:18,min:12,note:"Good Queen-walk support floor."},
+  "frozen arrow":{display:"Frozen Arrow",hero:"Archer Queen",rarity:"Epic",max:27,min:15,note:"Usable at 15; push higher only if it fits your attacks."},
+  "magic mirror":{display:"Magic Mirror",hero:"Archer Queen",rarity:"Epic",max:27,min:18,note:"Major Queen DPS breakpoint."},
+  "action figure":{display:"Action Figure",hero:"Archer Queen",rarity:"Epic",max:27,min:21,note:"TH18 meta breakpoint; 18 is usable, 21+ is the real target."},
+  "monolith arrow":{display:"Monolith Arrow",hero:"Archer Queen",rarity:"Epic",max:27,min:12,note:"Usable around 9-12 depending on your plan."},
+
+  "eternal tome":{display:"Eternal Tome",hero:"Grand Warden",rarity:"Common",max:18,min:12,note:"Core Warden value; raise higher once main gear is covered."},
+  "life gem":{display:"Life Gem",hero:"Grand Warden",rarity:"Common",max:18,min:12,note:"Good baseline for HP-based armies."},
+  "healing tome":{display:"Healing Tome",hero:"Grand Warden",rarity:"Common",max:18,min:12,note:"Strong sustain; very common with air and spam attacks."},
+  "rage gem":{display:"Rage Gem",hero:"Grand Warden",rarity:"Common",max:18,min:15,note:"15+ is where it starts to really shine."},
+  "fireball":{display:"Fireball",hero:"Grand Warden",rarity:"Epic",max:27,min:24,note:"Do not half-send this one; 24 is the big practical breakpoint."},
+  "lavaloon puppet":{display:"Lavaloon Puppet",hero:"Grand Warden",rarity:"Epic",max:27,min:15,note:"Niche air tool; 15 is a practical epic floor."},
+  "heroic torch":{display:"Heroic Torch",hero:"Grand Warden",rarity:"Epic",max:27,min:18,note:"Ground/smash utility; higher is better."},
+
+  "royal gem":{display:"Royal Gem",hero:"Royal Champion",rarity:"Common",max:18,min:12,note:"Baseline sustain; useful but often replaced later."},
+  "seeking shield":{display:"Seeking Shield",hero:"Royal Champion",rarity:"Common",max:18,min:18,note:"Max recommended if you use shield value for path clearing."},
+  "hog rider puppet":{display:"Hog Rider Puppet",hero:"Royal Champion",rarity:"Common",max:18,min:12,note:"Good utility floor."},
+  "haste vial":{display:"Haste Vial",hero:"Royal Champion",rarity:"Common",max:18,min:15,note:"12 is usable; 15 is the stronger floor."},
+  "rocket spear":{display:"Rocket Spear",hero:"Royal Champion",rarity:"Epic",max:27,min:18,note:"Strong utility/funneling breakpoint."},
+  "electro boots":{display:"Electro Boots",hero:"Royal Champion",rarity:"Epic",max:27,min:15,note:"Top RC option; 15+ is the practical floor."},
+  "frost flake":{display:"Frost Flake",hero:"Royal Champion",rarity:"Epic",max:27,min:15,note:"Use 15 as a practical epic baseline."},
+
+  "dark orb":{display:"Dark Orb",hero:"Minion Prince",rarity:"Common",max:18,min:15,note:"Core Minion Prince baseline."},
+  "henchmen puppet":{display:"Henchmen Puppet",hero:"Minion Prince",rarity:"Common",max:18,min:9,note:"Lower-priority baseline."},
+  "metal pants":{display:"Metal Pants",hero:"Minion Prince",rarity:"Common",max:18,min:15,note:"Good solo/survival baseline."},
+  "metal trousers":{display:"Metal Pants",hero:"Minion Prince",rarity:"Common",max:18,min:15,note:"Alias for Metal Pants."},
+  "noble iron":{display:"Noble Iron",hero:"Minion Prince",rarity:"Common",max:18,min:12,note:"Practical common baseline."},
+  "dark crown":{display:"Dark Crown",hero:"Minion Prince",rarity:"Epic",max:27,min:18,note:"18+ usable; 21/24 if it is a main setup."},
+  "meteor staff":{display:"Meteor Staff",hero:"Minion Prince",rarity:"Epic",max:27,min:18,note:"18+ usable; 21/24 if it is a main setup."},
+
+  "fire heart":{display:"Fire Heart",hero:"Dragon Duke",rarity:"Common",max:18,min:18,note:"High-priority Duke gear; max/common target."},
+  "flame blower":{display:"Flame Blower",hero:"Dragon Duke",rarity:"Common",max:18,min:18,note:"Strong Duke value; max/common target."},
+  "stun blaster":{display:"Stun Blaster",hero:"Dragon Duke",rarity:"Common",max:18,min:15,note:"Usable at 15; commit higher if you prefer stun chains."},
+  "electro fangs":{display:"Electro Fangs",hero:"Dragon Duke",rarity:"Common",max:18,min:15,note:"Practical common baseline."},
+  "rocket backpack":{display:"Rocket Backpack",hero:"Dragon Duke",rarity:"Epic",max:27,min:21,note:"21 is the floor; 24 is the premium target."}
 };
+
+const EQUIPMENT_ALIASES = {
+  "invincibility":"eternal tome",
+  "invincible":"eternal tome",
+  "invincible tome":"eternal tome",
+  "life amulet":"life gem",
+  "heal book":"healing tome",
+  "invincible heal book":"healing tome",
+  "torch":"heroic torch",
+  "electric boots":"electro boots",
+  "tracking shield":"seeking shield",
+  "haste spell":"haste vial",
+  "fang heart":"fire heart",
+  "heart":"fire heart",
+  "flame bellows":"flame blower"
+};
+
+function getEquipmentMetaByName(name){
+  const key=normName(name);
+  return EQUIPMENT_META[key] || EQUIPMENT_META[EQUIPMENT_ALIASES[key]] || null;
+}
 
 // Best-effort Data Export ID mappings. If Supercell changes or adds IDs, unknown equipment still appears by ID.
 const EQUIPMENT_ID_NAMES = {
+  // Public export-ID mappings for Hero Equipment are still incomplete.
+  // Keep verified IDs here when you learn them, for example:
+  // 90000004:"Eternal Tome"
 };
+
+function loadEquipmentNameOverrides(){
+  try { return JSON.parse(localStorage.getItem("warRoomEquipmentNames") || "{}"); }
+  catch(e){ return {}; }
+}
+function saveEquipmentNameOverride(id,name){
+  if (!Number.isFinite(Number(id))) return;
+  const data=loadEquipmentNameOverrides();
+  const clean=String(name || "").trim();
+  if (clean) data[String(id)] = clean;
+  else delete data[String(id)];
+  localStorage.setItem("warRoomEquipmentNames", JSON.stringify(data));
+}
+function equipmentFallbackName(id, max){
+  const kind = Number(max) === 27 ? "Epic equipment" : "Common equipment";
+  return Number.isFinite(Number(id)) ? `${kind} ${id}` : kind;
+}
 
 const SUPERCHARGE_INFO = {
   1000004:{name:"Gold Mine",maxCharge:3,kind:"Collector"},
@@ -500,6 +571,51 @@ const SUPERCHARGE_INFO = {
   1000079:{name:"Multi-Gear Tower",maxCharge:2,kind:"Defense"},
   1000011:{name:"Wizard Tower / Super Wizard Tower",maxCharge:2,kind:"Defense"}
 };
+
+const ICON_FILE_OVERRIDES = {
+  "town hall":"Town_Hall18.png",
+  "hero hall":"Hero_Hall12.png",
+  "laboratory":"Laboratory16.png",
+  "army camp":"Army_Camp14.png",
+  "barracks":"Barracks19.png",
+  "dark barracks":"Dark_Barracks13.png",
+  "spell factory":"Spell_Factory9.png",
+  "dark spell factory":"Dark_Spell_Factory8.png",
+  "workshop":"Siege_Workshop9.png",
+  "pet house":"Pet_House12.png",
+  "blacksmith":"Blacksmith10.png",
+  "clan castle":"Clan_Castle14.png",
+  "wall":"Wall19.png",
+  "barbarian king":"Barbarian_King.png",
+  "archer queen":"Archer_Queen.png",
+  "grand warden":"Grand_Warden.png",
+  "royal champion":"Royal_Champion.png",
+  "minion prince":"Minion_Prince.png",
+  "dragon duke":"Dragon_Duke.png",
+  "super wizard tower":"Super_Wizard_Tower.png"
+};
+function iconInitials(name){
+  const words=String(name || "?").replace(/[^A-Za-z0-9 ]/g," ").trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "?";
+  return words.slice(0,2).map(w=>w[0]).join("").toUpperCase();
+}
+function fandomFileForName(name, level){
+  const key=normName(name);
+  if (key === "town hall" && Number.isFinite(Number(level))) return `Town_Hall${Number(level)}.png`;
+  if (key === "wall" && Number.isFinite(Number(level))) return `Wall${Number(level)}.png`;
+  if (ICON_FILE_OVERRIDES[key]) return ICON_FILE_OVERRIDES[key];
+  return String(name || "Clash of Clans").replace(/\./g,"").replace(/&/g,"and").trim().replace(/\s+/g,"_") + ".png";
+}
+function iconUrl(name, level){
+  return "https://clashofclans.fandom.com/wiki/Special:Redirect/file/" + encodeURIComponent(fandomFileForName(name,level));
+}
+function iconMarkup(name, level){
+  const initials=iconInitials(name);
+  return `<span class="asset-thumb"><img loading="lazy" referrerpolicy="no-referrer" src="${esc(iconUrl(name,level))}" alt="${esc(name)} icon" onerror="this.parentElement.classList.add('fallback')"><span>${esc(initials)}</span></span>`;
+}
+function assetLine(name, level, extra=""){
+  return `<div class="asset-line">${iconMarkup(name,level)}<div>${extra || `<div>${esc(name)}</div>`}</div></div>`;
+}
 
 function num(v){
   if (typeof v === "number") return v;
@@ -562,19 +678,23 @@ function collectEquipment(json){
     const idVal=num(firstDefined(node.data,node.dataId,node.id,node.equipmentId,node.gearId));
     const lvlVal=num(firstDefined(node.lvl,node.level,node.currentLevel,node.equipmentLevel));
     const rarityText=cleanName(firstDefined(node.rarity,node.type,node.equipmentRarity));
-    const nameKey=normName(name || EQUIPMENT_ID_NAMES[idVal]);
-    const known=EQUIPMENT_META[nameKey] || null;
+    const overrides=loadEquipmentNameOverrides();
+    const mappedName = Number.isFinite(idVal) ? (overrides[String(idVal)] || EQUIPMENT_ID_NAMES[idVal] || "") : "";
+    const nameKey=normName(name || mappedName);
+    const known=getEquipmentMetaByName(name || mappedName);
     const looksLikeEquipment = inEquipPath || !!known || /hero.?equipment|equipment|blacksmith|gear/.test(pathText);
     if (looksLikeEquipment && Number.isFinite(lvlVal) && (name || Number.isFinite(idVal))){
-      const displayName = name || EQUIPMENT_ID_NAMES[idVal] || `Equipment ID ${idVal}`;
-      const rarity = known?.rarity || rarityText || (lvlVal > 18 ? "Epic?" : "Unknown");
+      const rarityFromLevel = lvlVal > 18 ? "Epic" : "Common";
+      const rarity = known?.rarity || rarityText || rarityFromLevel;
       const maxFromNode = num(firstDefined(node.maxLevel,node.max,node.cap));
       const max = Number.isFinite(maxFromNode) ? maxFromNode : (known?.max || (String(rarity).toLowerCase().includes("epic") ? 27 : 18));
-      const hero = known?.hero || cleanName(firstDefined(node.hero,node.heroName,node.assignedHero,context.hero)) || "Unassigned/unknown";
+      const displayName = name || mappedName || equipmentFallbackName(idVal, max);
+      const hero = known?.hero || cleanName(firstDefined(node.hero,node.heroName,node.assignedHero,context.hero)) || "Hero not mapped";
+      const nameSource = name ? "export" : (mappedName ? "mapped" : "fallback");
       const key = `${displayName}|${lvlVal}|${path.join(".")}`;
       if (!seen.has(key)){
         seen.add(key);
-        found.push({id:Number.isFinite(idVal)?idVal:null,name:displayName,level:lvlVal,max,rarity,hero,path:path.join("."),equipped:!!node.equipped || !!node.active});
+        found.push({id:Number.isFinite(idVal)?idVal:null,name:known?.display || displayName,level:lvlVal,max,rarity,hero,path:path.join("."),nameSource,equipped:!!node.equipped || !!node.active,minRecommended:known?.min ?? null,minNote:known?.note || ""});
       }
     }
     let nextContext=context;
@@ -733,6 +853,37 @@ function buildQueue(items){
 const TAGMAP={core:"hero",hero:"hero",army:"army",troop:"lab",spell:"lab",pet:"lab",siege:"lab",def:"def",trap:"def",res:"def",wall:"def",unknown:"unknown"};
 const TAGLABEL={core:"Builder",hero:"Hero Hall",army:"Builder",troop:"Laboratory",spell:"Laboratory",pet:"Pet House",siege:"Workshop",def:"Builder",trap:"Builder",res:"Builder",wall:"Builder",unknown:"Unmapped"};
 
+function renderEquipmentMinimums(equipment){
+  const el=document.getElementById("equipmentRecommendations");
+  if (!el) return;
+  const byName=new Map((equipment || []).map(e=>[normName(e.name), e]));
+  const canonical=Object.entries(EQUIPMENT_META).filter(([k,m])=>m.display && normName(m.display)===k);
+  const groups={};
+  for (const [key,m] of canonical){
+    if (!groups[m.hero]) groups[m.hero]=[];
+    groups[m.hero].push({key,...m});
+  }
+  const order=["Barbarian King","Archer Queen","Minion Prince","Grand Warden","Royal Champion","Dragon Duke"];
+  let html=`<div class="rec-head"><h3>Recommended minimum levels</h3><div class="equip-meta">Baseline targets from current guide sources; max your main gear after these floors.</div></div>`;
+  for (const hero of order){
+    const rows=groups[hero] || [];
+    if (!rows.length) continue;
+    html += `<details class="cat"><summary><span class="cat-name">${esc(hero)}</span><span class="cat-count">${rows.length} equipment</span><span class="chev">▸</span></summary><div class="rec-grid">`;
+    for (const m of rows){
+      const owned=byName.get(normName(m.display));
+      const status=owned ? (owned.level >= m.min ? `<span class="equip-ok">Current ${owned.level}: meets min</span>` : `<span class="equip-warning">Current ${owned.level}: needs ${m.min-owned.level} more</span>`) : `<span class="equip-meta">Not detected / rename ID to match</span>`;
+      html += `<div class="rec-card">
+        <div class="rec-title">${iconMarkup(m.display,m.max)}<span>${esc(m.display)}</span></div>
+        <div class="rec-sub">${esc(m.rarity)} - recommended min ${m.min}/${m.max}</div>
+        <div>${status}</div>
+        <div class="rec-note">${esc(m.note || "")}</div>
+      </div>`;
+    }
+    html += `</div></details>`;
+  }
+  el.innerHTML=html;
+}
+
 function renderEquipmentTab(equipment, oreData){
   const summary=document.getElementById("equipmentSummary");
   const listEl=document.getElementById("equipmentList");
@@ -740,11 +891,15 @@ function renderEquipmentTab(equipment, oreData){
   const ores=oreData?.ores || {shiny:null,glowy:null,starry:null};
   const total=equipment.length;
   const maxed=equipment.filter(e=>e.level>=e.max).length;
+  const withMin=equipment.filter(e=>e.minRecommended != null);
+  const atMin=withMin.filter(e=>e.level>=e.minRecommended).length;
   const avg=total ? Math.round(equipment.reduce((s,e)=>s+(e.level/e.max),0)/total*100) : 0;
+  renderEquipmentMinimums(equipment);
   summary.innerHTML=`
     <div class="stat-grid">
       <div class="stat-card"><div class="label">Equipment found</div><div class="big">${total}</div><div class="small">From equipment/gear fields in your JSON</div></div>
       <div class="stat-card"><div class="label">Maxed</div><div class="big">${maxed}/${total || 0}</div><div class="small">Common cap 18, Epic cap 27</div></div>
+      <div class="stat-card"><div class="label">At recommended min</div><div class="big">${atMin}/${withMin.length || 0}</div><div class="small">Only known/renamed equipment</div></div>
       <div class="stat-card"><div class="label">Average progress</div><div class="big">${avg}%</div><div class="small">Based on detected equipment only</div></div>
     </div>
     <div class="ore-inputs">
@@ -752,7 +907,7 @@ function renderEquipmentTab(equipment, oreData){
       <div class="ore-input"><label>Glowy Ore</label><input value="${ores.glowy ?? "not detected"}" readonly></div>
       <div class="ore-input"><label>Starry Ore</label><input value="${ores.starry ?? "not detected"}" readonly></div>
     </div>
-    <div class="notice" style="display:block">Ores are read only if the export includes ore fields. Equipment upgrades are instant and use Shiny, Glowy, and sometimes Starry Ore.</div>`;
+    <div class="notice" style="display:block">Ores are read only if the export includes ore fields. If an equipment card says Common/Epic equipment plus an ID, use the rename box on that card once. The name saves in this browser.</div>`;
   listEl.innerHTML="";
   if (!equipment.length){
     listEl.innerHTML=`<div class="equip-card"><div class="equip-name">No equipment entries found</div><div class="equip-meta">Your export may not expose equipment, or it may use a new field name. Paste an export/API JSON that contains hero equipment and this tab will list it.</div></div>`;
@@ -763,16 +918,26 @@ function renderEquipmentTab(equipment, oreData){
     const pct=Math.max(0,Math.min(100,Math.round(eq.level/eq.max*100)));
     const div=document.createElement("div");
     div.className="equip-card";
+    const needsName = eq.nameSource === "fallback" && eq.id != null;
     div.innerHTML=`
       <div class="equip-top">
-        <div>
-          <div class="equip-name">${esc(eq.name)}</div>
-          <div class="equip-meta">${esc(eq.hero)} · level ${eq.level}/${eq.max}</div>
-        </div>
+        ${assetLine(eq.name, eq.max, `<div class="equip-name">${esc(eq.name)}</div><div class="equip-meta">${esc(eq.hero)} - level ${eq.level}/${eq.max}${eq.id != null ? ` - ID ${eq.id}` : ""}</div>`)}
         <div class="badge-row"><span class="badge ${String(eq.rarity).toLowerCase().includes("epic")?"epic":"common"}">${esc(eq.rarity)}</span>${eq.equipped?`<span class="badge ore">Equipped</span>`:""}</div>
       </div>
-      <div class="bar"><i class="${full?"full":"lab-bar"}" style="width:${pct}%"></i></div>`;
+      <div class="equip-rec">${eq.minRecommended != null ? `<span>Recommended minimum: <strong>level ${eq.minRecommended}</strong></span>${eq.level < eq.minRecommended ? `<span class="equip-warning">Needs ${eq.minRecommended-eq.level} more</span>` : `<span class="equip-ok">Meets minimum</span>`}` : `<span>Rename this equipment to show a recommended minimum.</span>`}</div>
+      ${eq.minNote ? `<div class="rec-note">${esc(eq.minNote)}</div>` : ""}
+      <div class="bar"><i class="${full?"full":"lab-bar"}" style="width:${pct}%"></i></div>
+      ${needsName ? `<div class="equip-editor"><input data-eq-name-input="${eq.id}" placeholder="Rename this ID, example: Eternal Tome"><button data-eq-save="${eq.id}" type="button">Save name</button></div><div class="hintline">The Clash export gives this as an ID only, so this lets you label it manually.</div>` : ""}`;
     listEl.appendChild(div);
+    const saveBtn = div.querySelector(`[data-eq-save="${eq.id}"]`);
+    if (saveBtn){
+      saveBtn.addEventListener("click",()=>{
+        const input=div.querySelector(`[data-eq-name-input="${eq.id}"]`);
+        saveEquipmentNameOverride(eq.id,input?.value || "");
+        const raw=document.getElementById("jsonInput")?.value?.trim();
+        if (raw) render(analyze(raw));
+      });
+    }
   }
 }
 
@@ -805,10 +970,7 @@ function renderSuperchargeTab(rows){
     const chargeText = row.eligible>1 ? `${row.eligible} eligible · lowest charge ${row.minCharge}/${row.maxCharge}` : `charge ${row.minCharge}/${row.maxCharge}`;
     div.innerHTML=`
       <div class="super-top">
-        <div>
-          <div class="super-name">${esc(row.name)}</div>
-          <div class="super-meta">${esc(row.kind)} · ${chargeText}</div>
-        </div>
+        ${assetLine(row.name, null, `<div class="super-name">${esc(row.name)}</div><div class="super-meta">${esc(row.kind)} · ${chargeText}</div>`)}
         <div class="badge-row"><span class="badge ${row.kind==="Collector"?"ore":"common"}">${esc(row.kind)}</span>${row.upgrading?`<span class="badge epic">upgrading</span>`:""}</div>
       </div>
       <div class="bar"><i class="${full?"full":"lab-bar"}" style="width:${pctFill}%"></i></div>`;
@@ -861,8 +1023,7 @@ function render(result){
     div.innerHTML=`
       <div class="rank">${i+1}</div>
       <div class="body">
-        <div class="what">${esc(it.name)}</div>
-        <div class="lvls">${lvlTxt}</div>
+        ${assetLine(it.name, it.maxLvlSeen || it.max, `<div class="what">${esc(it.name)}</div><div class="lvls">${lvlTxt}</div>`)}
         ${it.why?`<div class="why">${esc(it.why)}</div>`:""}
         <span class="tag ${TAGMAP[it.cat]}">${TAGLABEL[it.cat]}</span>
       </div>`;
@@ -907,7 +1068,7 @@ function render(result){
         pctFill=100; full=false; barClass="unknown-bar";
       }
       row.innerHTML=`
-        <div class="nm">${esc(it.name)}${it.upgrading?` <small>⏳ upgrading</small>`:""}</div>
+        <div class="nm">${assetLine(it.name, it.maxLvlSeen || it.max, `<span>${esc(it.name)}${it.upgrading?` <small>upgrading</small>`:""}</span>`)}</div>
         <div class="lv ${full?"maxed":""}">${esc(lvTxt)}</div>
         <div class="bar"><i class="${full?"full":""} ${barClass}" style="width:${pctFill}%"></i></div>`;
       rows.appendChild(row);
