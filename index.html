@@ -124,9 +124,9 @@
   .equip-card,.super-card{background:var(--card-solid);border:1px solid var(--border);border-radius:16px;padding:14px;display:grid;gap:8px}
   .asset-line{display:flex;align-items:center;gap:10px;min-width:0}
   .asset-thumb{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,rgba(124,58,237,.26),rgba(34,197,94,.12));border:1px solid var(--border);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
-  .asset-thumb img{width:100%;height:100%;object-fit:contain;display:block;padding:3px}
-  .asset-thumb span{display:none;font-size:13px;font-weight:900;color:#ddd6fe;text-align:center}
-  .asset-thumb.fallback img{display:none}
+  .asset-thumb img{display:none!important}
+  .asset-thumb span{display:grid;font-size:13px;font-weight:900;color:#ddd6fe;text-align:center}
+  .asset-thumb.fallback img{display:none!important}
   .asset-thumb.fallback span{display:grid}
   .row .asset-thumb{width:34px;height:34px;border-radius:11px}
   .row .asset-line{min-width:0}
@@ -135,8 +135,10 @@
   .equip-warning{color:#fecdd3;font-size:12px;font-weight:750}
   .equip-ok{color:#bbf7d0;font-size:12px;font-weight:750}
   .equip-editor{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
-  .equip-editor input{flex:1;min-width:190px;background:#070b14;border:1px solid var(--border);border-radius:12px;color:var(--text);padding:10px 11px;font:inherit;font-size:13px;outline:none}
-  .equip-editor button{background:rgba(124,58,237,.22);border:1px solid rgba(196,181,253,.28);border-radius:12px;color:#ede9fe;padding:10px 12px;font-weight:800;cursor:pointer}
+  .equip-editor input,.equip-editor select{flex:1;min-width:190px;background:#070b14;border:1px solid var(--border);border-radius:12px;color:var(--text);padding:10px 11px;font:inherit;font-size:13px;outline:none}
+  .equip-editor select option{background:#070b14;color:var(--text)}
+  .equip-editor button,.ore-input button{background:rgba(124,58,237,.22);border:1px solid rgba(196,181,253,.28);border-radius:12px;color:#ede9fe;padding:10px 12px;font-weight:800;cursor:pointer}
+  .equip-editor button:hover,.ore-input button:hover{filter:brightness(1.12)}
   .hintline{font-size:12px;color:var(--muted2)}
   .rec-head{margin-top:16px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
   .rec-head h3{font-size:17px;letter-spacing:-.025em}
@@ -156,7 +158,9 @@
   .ore-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:10px}
   .ore-input{background:#070b14;border:1px solid var(--border);border-radius:12px;padding:10px;color:var(--text)}
   .ore-input label{display:block;font-size:11px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
-  .ore-input input{width:100%;background:transparent;border:0;color:var(--text);font:inherit;font-weight:800;outline:none}
+  .ore-input input,.ore-input select{width:100%;background:transparent;border:0;color:var(--text);font:inherit;font-weight:800;outline:none}
+  .ore-input button{margin-top:8px;width:100%;font-size:12px;padding:8px 10px}
+  .ore-input select option{background:#0f172a;color:#f8fafc}
   .queue{margin-top:20px}
   .queue-title{font-size:22px;margin-bottom:4px}
   .queue-sub{color:var(--muted);font-size:13px;margin-bottom:14px}
@@ -191,6 +195,8 @@
   footer{margin-top:34px;text-align:center;color:var(--muted2);font-size:12px;line-height:1.7}
   code{font-family:"SFMono-Regular",Consolas,monospace;background:rgba(148,163,184,.12);padding:2px 5px;border-radius:6px;color:#e2e8f0}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+  img{display:none!important}
 </style>
 </head>
 <body>
@@ -272,8 +278,8 @@
         <div class="queue-title">Equipment and ores</div>
         <div class="queue-sub">Tracks equipment levels if your export includes equipment data. Ore balances are detected when the export exposes ore fields.</div>
         <div id="equipmentSummary"></div>
-        <div id="equipmentRecommendations"></div>
         <div id="equipmentList" class="equipment-grid"></div>
+        <div id="equipmentRecommendations"></div>
       </div>
     </div>
 
@@ -288,7 +294,7 @@
   </section>
 
   <footer>
-    Modern version with tabs, equipment minimum targets, Supercharges, and image thumbnails. Update <code>ITEMS</code> or rename unknown equipment IDs when Supercell changes exports.
+    Version 10: no external photos/images. Uses stable letter badges only, plus equipment ore planner, supercharges, and manual ore inputs. Update <code>ITEMS</code> or rename unknown equipment IDs when Supercell changes exports.
   </footer>
 </div>
 <script>
@@ -554,6 +560,360 @@ function equipmentFallbackName(id, max){
   return Number.isFinite(Number(id)) ? `${kind} ${id}` : kind;
 }
 
+function canonicalEquipmentChoices(){
+  const rows=[];
+  for (const [key,m] of Object.entries(EQUIPMENT_META)){
+    if (!m.display || normName(m.display)!==key) continue;
+    rows.push({name:m.display,hero:m.hero,rarity:m.rarity,max:m.max});
+  }
+  rows.sort((a,b)=>{
+    const heroOrder=["Barbarian King","Archer Queen","Minion Prince","Grand Warden","Royal Champion","Dragon Duke"];
+    const ha=heroOrder.indexOf(a.hero), hb=heroOrder.indexOf(b.hero);
+    if (ha!==hb) return (ha<0?99:ha)-(hb<0?99:hb);
+    if (a.max!==b.max) return a.max-b.max;
+    return a.name.localeCompare(b.name);
+  });
+  return rows;
+}
+function equipmentSelectHtml(id,max,currentName=""){
+  const choices=canonicalEquipmentChoices();
+  const current=normName(currentName);
+  let html=`<select data-eq-select="${id}"><option value="">Choose the real equipment name...</option>`;
+  let lastHero="";
+  for (const c of choices){
+    if (lastHero && lastHero!==c.hero) html += `<option disabled>──────────</option>`;
+    lastHero=c.hero;
+    const label=`${c.hero} - ${c.name} (${c.rarity})`;
+    const selected=current && current===normName(c.name) ? " selected" : "";
+    // Prefer matching rarity/cap but still show everything because Supercell can change exports.
+    const capHint = Number(max)===c.max ? "" : ` data-cap-mismatch="1"`;
+    html += `<option value="${esc(c.name)}"${selected}${capHint}>${esc(label)}</option>`;
+  }
+  html += `</select>`;
+  return html;
+}
+
+function loadManualOres(){
+  try { return JSON.parse(localStorage.getItem("warRoomManualOres") || "{}"); }
+  catch(e){ return {}; }
+}
+function saveManualOres(ores){
+  localStorage.setItem("warRoomManualOres", JSON.stringify(ores || {}));
+}
+function displayOreValue(type,detected){
+  // Manual values are the source of truth for ore planning because the Clash export
+  // often omits ore balances. If the user typed a value, always use it.
+  const manual=loadManualOres();
+  const v=manual[type];
+  if (v !== undefined && v !== null && v !== "") return v;
+  return detected != null ? detected : "";
+}
+
+
+const ORE_LEAGUES = {
+  "Bronze III":{shiny:125,glowy:6,starry:0},
+  "Bronze II":{shiny:175,glowy:7,starry:0},
+  "Bronze I":{shiny:175,glowy:8,starry:0},
+  "Silver III":{shiny:200,glowy:9,starry:0},
+  "Silver II":{shiny:250,glowy:10,starry:0},
+  "Silver I":{shiny:275,glowy:11,starry:0},
+  "Gold III":{shiny:300,glowy:12,starry:0},
+  "Gold II":{shiny:325,glowy:14,starry:0},
+  "Gold I":{shiny:350,glowy:16,starry:0},
+  "Crystal III":{shiny:375,glowy:18,starry:0},
+  "Crystal II":{shiny:400,glowy:20,starry:0},
+  "Crystal I":{shiny:425,glowy:22,starry:0},
+  "Master III":{shiny:450,glowy:24,starry:0},
+  "Master II":{shiny:500,glowy:26,starry:0},
+  "Master I":{shiny:525,glowy:28,starry:0},
+  "Champion III":{shiny:550,glowy:30,starry:0},
+  "Champion II":{shiny:625,glowy:34,starry:0},
+  "Champion I":{shiny:700,glowy:38,starry:0},
+  "Titan III":{shiny:775,glowy:42,starry:0},
+  "Titan II":{shiny:850,glowy:46,starry:0},
+  "Titan I":{shiny:925,glowy:50,starry:0},
+  "Legend":{shiny:1000,glowy:54,starry:0}
+};
+const DEFAULT_ORE_INCOME = {
+  league:"Titan I",
+  starDays:30,
+  warsPerMonth:12,
+  warWinRate:50,
+  warWinShiny:700,
+  warWinGlowy:25,
+  warWinStarry:4,
+  warLossShiny:175,
+  warLossGlowy:6,
+  warLossStarry:1,
+  cwlAttacks:7,
+  cwlWinRate:100,
+  cwlShiny:1110,
+  cwlGlowy:39,
+  cwlStarry:6,
+  traderOres:true,
+  freeGlowy:true,
+  extraShiny:0,
+  extraGlowy:0,
+  extraStarry:0,
+  oreGoal:"max"
+};
+function loadOreIncomeSettings(){
+  try { return {...DEFAULT_ORE_INCOME, ...(JSON.parse(localStorage.getItem("warRoomOreIncome") || "{}"))}; }
+  catch(e){ return {...DEFAULT_ORE_INCOME}; }
+}
+function saveOreIncomeSettings(settings){
+  localStorage.setItem("warRoomOreIncome", JSON.stringify(settings || DEFAULT_ORE_INCOME));
+}
+function oreNum(v, fallback=0){
+  const n = Number(String(v ?? "").replace(/,/g,""));
+  return Number.isFinite(n) ? n : fallback;
+}
+function fmtOre(n){
+  return Math.round(Number(n || 0)).toLocaleString();
+}
+function calcMonthlyOreIncome(settings){
+  const s={...DEFAULT_ORE_INCOME,...(settings||{})};
+  const league=ORE_LEAGUES[s.league] || ORE_LEAGUES[DEFAULT_ORE_INCOME.league];
+  const starDays=oreNum(s.starDays,30);
+  const wars=oreNum(s.warsPerMonth,0);
+  const winRate=Math.max(0,Math.min(100,oreNum(s.warWinRate,0)))/100;
+  const cwlAttacks=oreNum(s.cwlAttacks,0);
+  const cwlRate=Math.max(0,Math.min(100,oreNum(s.cwlWinRate,100)))/100;
+  const traderWeeks=52/12;
+  const parts={
+    star:{shiny:league.shiny*starDays,glowy:league.glowy*starDays,starry:league.starry*starDays},
+    war:{
+      shiny:wars*(winRate*oreNum(s.warWinShiny)+((1-winRate)*oreNum(s.warLossShiny))),
+      glowy:wars*(winRate*oreNum(s.warWinGlowy)+((1-winRate)*oreNum(s.warLossGlowy))),
+      starry:wars*(winRate*oreNum(s.warWinStarry)+((1-winRate)*oreNum(s.warLossStarry)))
+    },
+    cwl:{shiny:cwlAttacks*cwlRate*oreNum(s.cwlShiny),glowy:cwlAttacks*cwlRate*oreNum(s.cwlGlowy),starry:cwlAttacks*cwlRate*oreNum(s.cwlStarry)},
+    trader:{shiny:s.traderOres ? 1000*traderWeeks : 0, glowy:s.traderOres ? 100*traderWeeks : 0, starry:s.traderOres ? 10*traderWeeks : 0},
+    free:{shiny:0, glowy:s.freeGlowy ? 10*traderWeeks : 0, starry:0},
+    extra:{shiny:oreNum(s.extraShiny),glowy:oreNum(s.extraGlowy),starry:oreNum(s.extraStarry)}
+  };
+  const total={shiny:0,glowy:0,starry:0};
+  for (const part of Object.values(parts)){
+    total.shiny += part.shiny || 0;
+    total.glowy += part.glowy || 0;
+    total.starry += part.starry || 0;
+  }
+  return {settings:s,parts,total};
+}
+
+
+// Upgrade cost tables. The key is the level you are upgrading TO.
+// Common equipment uses Shiny + Glowy. Epic uses the same Shiny/Glowy costs plus Starry at key levels.
+const EQUIPMENT_COSTS_COMMON = {
+  2:{shiny:120,glowy:0,starry:0}, 3:{shiny:240,glowy:20,starry:0}, 4:{shiny:400,glowy:0,starry:0},
+  5:{shiny:600,glowy:0,starry:0}, 6:{shiny:840,glowy:100,starry:0}, 7:{shiny:1120,glowy:0,starry:0},
+  8:{shiny:1440,glowy:0,starry:0}, 9:{shiny:1800,glowy:200,starry:0}, 10:{shiny:1900,glowy:0,starry:0},
+  11:{shiny:2000,glowy:0,starry:0}, 12:{shiny:2100,glowy:400,starry:0}, 13:{shiny:2200,glowy:0,starry:0},
+  14:{shiny:2300,glowy:0,starry:0}, 15:{shiny:2400,glowy:600,starry:0}, 16:{shiny:2500,glowy:0,starry:0},
+  17:{shiny:2600,glowy:0,starry:0}, 18:{shiny:2700,glowy:600,starry:0}
+};
+const EQUIPMENT_COSTS_EPIC = {
+  ...EQUIPMENT_COSTS_COMMON,
+  9:{shiny:1800,glowy:200,starry:10}, 12:{shiny:2100,glowy:400,starry:20}, 15:{shiny:2400,glowy:600,starry:30},
+  18:{shiny:2700,glowy:600,starry:50}, 19:{shiny:2800,glowy:0,starry:0}, 20:{shiny:2900,glowy:0,starry:0},
+  21:{shiny:3000,glowy:600,starry:100}, 22:{shiny:3100,glowy:0,starry:0}, 23:{shiny:3200,glowy:0,starry:0},
+  24:{shiny:3300,glowy:600,starry:120}, 25:{shiny:3400,glowy:0,starry:0}, 26:{shiny:3500,glowy:0,starry:0},
+  27:{shiny:3600,glowy:600,starry:150}
+};
+function blankOreCost(){ return {shiny:0,glowy:0,starry:0}; }
+function addOreCost(a,b){
+  a.shiny += Number(b?.shiny || 0);
+  a.glowy += Number(b?.glowy || 0);
+  a.starry += Number(b?.starry || 0);
+  return a;
+}
+function equipmentTargetLevel(eq, mode){
+  const max=Math.max(1,oreNum(eq?.max,18));
+  if (mode === "minimum"){
+    if (eq?.minRecommended != null) return Math.min(max, Math.max(1, oreNum(eq.minRecommended, max)));
+    return Math.max(1, Math.floor(oreNum(eq?.level,1))); // unknown/named-later gear is ignored for minimum-goal mode
+  }
+  return max;
+}
+function equipmentRemainingOreCost(eq, mode){
+  const rarity=String(eq?.rarity || "").toLowerCase().includes("epic") || oreNum(eq?.max,18) > 18 ? "epic" : "common";
+  const table=rarity === "epic" ? EQUIPMENT_COSTS_EPIC : EQUIPMENT_COSTS_COMMON;
+  const current=Math.max(1, Math.floor(oreNum(eq?.level,1)));
+  const target=equipmentTargetLevel(eq, mode);
+  const total=blankOreCost();
+  for (let lvl=current+1; lvl<=target; lvl++) addOreCost(total, table[lvl] || blankOreCost());
+  return {rarity,target,current,total};
+}
+function calcEquipmentOreGoal(equipment, mode){
+  const total=blankOreCost();
+  const rows=[];
+  for (const eq of equipment || []){
+    const cost=equipmentRemainingOreCost(eq, mode);
+    if (cost.target <= cost.current) continue;
+    addOreCost(total,cost.total);
+    rows.push({eq,cost});
+  }
+  rows.sort((a,b)=>{
+    const av=a.cost.total.starry*35 + a.cost.total.glowy*5 + a.cost.total.shiny;
+    const bv=b.cost.total.starry*35 + b.cost.total.glowy*5 + b.cost.total.shiny;
+    return bv-av;
+  });
+  return {total,rows};
+}
+function oreGoalTiming(goal,current,monthly){
+  const deficits={
+    shiny:Math.max(0,oreNum(goal.shiny)-oreNum(current.shiny)),
+    glowy:Math.max(0,oreNum(goal.glowy)-oreNum(current.glowy)),
+    starry:Math.max(0,oreNum(goal.starry)-oreNum(current.starry))
+  };
+  const monthsByType={};
+  let months=0, bottleneck="none", impossible=false;
+  for (const type of ["shiny","glowy","starry"]){
+    if (deficits[type] <= 0){ monthsByType[type]=0; continue; }
+    const income=oreNum(monthly[type]);
+    if (income <= 0){ monthsByType[type]=Infinity; impossible=true; bottleneck=type; months=Infinity; continue; }
+    monthsByType[type]=deficits[type]/income;
+    if (!impossible && monthsByType[type] >= months){ months=monthsByType[type]; bottleneck=type; }
+  }
+  return {deficits,monthsByType,months,bottleneck,impossible};
+}
+function monthLabel(months){
+  if (!Number.isFinite(months)) return "Never with current income";
+  if (months <= 0) return "Now";
+  const days=Math.ceil(months*30.4375);
+  const d=new Date();
+  d.setDate(d.getDate()+days);
+  return d.toLocaleDateString(undefined,{month:"short",year:"numeric"});
+}
+function monthsText(months){
+  if (!Number.isFinite(months)) return "Never";
+  if (months <= 0) return "0 months";
+  if (months < 1) return `${Math.ceil(months*30)} days`;
+  return `${months.toFixed(months < 10 ? 1 : 0)} months`;
+}
+function oreTriple(o){ return `${fmtOre(o.shiny)} / ${fmtOre(o.glowy)} / ${fmtOre(o.starry)}`; }
+function renderOreGoalPlanner(equipment, settings, current, monthly){
+  const mode=settings.oreGoal || "max";
+  const goal=calcEquipmentOreGoal(equipment, mode);
+  const timing=oreGoalTiming(goal.total,current,monthly);
+  const label = mode === "minimum" ? "recommended minimums" : "max detected equipment";
+  const bottleneck = timing.bottleneck === "none" ? "none" : `${timing.bottleneck.charAt(0).toUpperCase()}${timing.bottleneck.slice(1)} Ore`;
+  const topRows = goal.rows.slice(0,8).map(({eq,cost})=>`
+    <div class="rec-card">
+      <div class="rec-title">${iconMarkup(eq.name,eq.max)}<span>${esc(eq.name)}</span></div>
+      <div class="rec-sub">${esc(eq.rarity)} - level ${cost.current} to ${cost.target}</div>
+      <div class="rec-note">Needs ${oreTriple(cost.total)} (Shiny / Glowy / Starry)</div>
+    </div>`).join("");
+  return `
+    <div class="rec-head">
+      <h3>When can I finish my equipment?</h3>
+      <div class="equip-meta">Goal: ${esc(label)}. This uses your typed ore balance plus all monthly source settings above.</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="label">Still needed</div><div class="big">${oreTriple(goal.total)}</div><div class="small">Shiny / Glowy / Starry for ${goal.rows.length} unfinished item${goal.rows.length===1?"":"s"}</div></div>
+      <div class="stat-card"><div class="label">After current ores</div><div class="big">${oreTriple(timing.deficits)}</div><div class="small">Remaining deficit after subtracting what you typed</div></div>
+      <div class="stat-card"><div class="label">Estimated finish</div><div class="big">${monthsText(timing.months)}</div><div class="small">Around ${esc(monthLabel(timing.months))}</div></div>
+      <div class="stat-card"><div class="label">Bottleneck</div><div class="big">${esc(bottleneck)}</div><div class="small">Most limiting ore based on current income</div></div>
+    </div>
+    <details class="cat" ${goal.rows.length ? "" : "open"}>
+      <summary><span class="cat-name">Equipment ore costs</span><span class="cat-count">${goal.rows.length} unfinished</span><span class="chev">▸</span></summary>
+      <div class="rec-grid">${topRows || `<div class="rec-card"><div class="rec-title">Already covered</div><div class="rec-note">Based on the selected goal, your detected/named equipment is already finished or no equipment was detected.</div></div>`}</div>
+    </details>
+    <div class="notice" style="display:block">For ID-only equipment, choose the real name first so the calculator knows whether it is Common or Epic. Unknown equipment is estimated from its current cap, which can be wrong if the export ID has not been named yet.</div>`;
+}
+function leagueOptionsHtml(selected){
+  return Object.keys(ORE_LEAGUES).map(name=>`<option value="${esc(name)}"${name===selected?" selected":""}>${esc(name)}</option>`).join("");
+}
+function renderOreIncomeEstimator(root,equipment){
+  equipment = equipment || window.__warRoomCurrentEquipment || [];
+  const box=root.querySelector("#oreIncomeEstimator");
+  if (!box) return;
+  const settings=loadOreIncomeSettings();
+  const {parts,total}=calcMonthlyOreIncome(settings);
+  const manual=loadManualOres();
+  const current={shiny:oreNum(manual.shiny,0),glowy:oreNum(manual.glowy,0),starry:oreNum(manual.starry,0)};
+  box.innerHTML=`
+    <div class="rec-head" style="margin-top:0">
+      <h3>Monthly ore estimate</h3>
+      <div class="equip-meta">Like Clashify: adjust your league, wars, CWL, trader buys, and extras. Saved in this browser.</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="label">Shiny / month</div><div class="big">${fmtOre(total.shiny)}</div><div class="small">After 1 month: ${fmtOre(current.shiny+total.shiny)}</div></div>
+      <div class="stat-card"><div class="label">Glowy / month</div><div class="big">${fmtOre(total.glowy)}</div><div class="small">After 1 month: ${fmtOre(current.glowy+total.glowy)}</div></div>
+      <div class="stat-card"><div class="label">Starry / month</div><div class="big">${fmtOre(total.starry)}</div><div class="small">After 1 month: ${fmtOre(current.starry+total.starry)}</div></div>
+    </div>
+    ${renderOreGoalPlanner(equipment, settings, current, total)}
+    <details class="cat" open>
+      <summary><span class="cat-name">Income settings</span><span class="cat-count">editable</span><span class="chev">▸</span></summary>
+      <div class="rows">
+        <div class="ore-inputs">
+          <div class="ore-input"><label>Ore goal</label><select data-income="oreGoal"><option value="max"${settings.oreGoal!=="minimum"?" selected":""}>Max detected equipment</option><option value="minimum"${settings.oreGoal==="minimum"?" selected":""}>Recommended minimums first</option></select></div>
+          <div class="ore-input"><label>League for star bonus</label><select data-income="league">${leagueOptionsHtml(settings.league)}</select></div>
+          <div class="ore-input"><label>Star bonus days/month</label><input data-income="starDays" type="number" min="0" max="31" step="1" value="${esc(settings.starDays)}"></div>
+          <div class="ore-input"><label>Regular wars/month</label><input data-income="warsPerMonth" type="number" min="0" max="31" step="1" value="${esc(settings.warsPerMonth)}"></div>
+          <div class="ore-input"><label>Regular war win rate %</label><input data-income="warWinRate" type="number" min="0" max="100" step="1" value="${esc(settings.warWinRate)}"></div>
+        </div>
+        <details class="cat">
+          <summary><span class="cat-name">Regular war ore values</span><span class="cat-count">per war</span><span class="chev">▸</span></summary>
+          <div class="ore-inputs" style="padding:0 16px 15px">
+            <div class="ore-input"><label>Win shiny</label><input data-income="warWinShiny" type="number" min="0" value="${esc(settings.warWinShiny)}"></div>
+            <div class="ore-input"><label>Win glowy</label><input data-income="warWinGlowy" type="number" min="0" value="${esc(settings.warWinGlowy)}"></div>
+            <div class="ore-input"><label>Win starry</label><input data-income="warWinStarry" type="number" min="0" value="${esc(settings.warWinStarry)}"></div>
+            <div class="ore-input"><label>Loss shiny</label><input data-income="warLossShiny" type="number" min="0" value="${esc(settings.warLossShiny)}"></div>
+            <div class="ore-input"><label>Loss glowy</label><input data-income="warLossGlowy" type="number" min="0" value="${esc(settings.warLossGlowy)}"></div>
+            <div class="ore-input"><label>Loss starry</label><input data-income="warLossStarry" type="number" min="0" value="${esc(settings.warLossStarry)}"></div>
+          </div>
+        </details>
+        <details class="cat">
+          <summary><span class="cat-name">CWL and extras</span><span class="cat-count">monthly</span><span class="chev">▸</span></summary>
+          <div class="ore-inputs" style="padding:0 16px 15px">
+            <div class="ore-input"><label>CWL attacks/month</label><input data-income="cwlAttacks" type="number" min="0" max="7" value="${esc(settings.cwlAttacks)}"></div>
+            <div class="ore-input"><label>CWL win rate %</label><input data-income="cwlWinRate" type="number" min="0" max="100" value="${esc(settings.cwlWinRate)}"></div>
+            <div class="ore-input"><label>CWL shiny/attack</label><input data-income="cwlShiny" type="number" min="0" value="${esc(settings.cwlShiny)}"></div>
+            <div class="ore-input"><label>CWL glowy/attack</label><input data-income="cwlGlowy" type="number" min="0" value="${esc(settings.cwlGlowy)}"></div>
+            <div class="ore-input"><label>CWL starry/attack</label><input data-income="cwlStarry" type="number" min="0" value="${esc(settings.cwlStarry)}"></div>
+            <div class="ore-input"><label>Extra shiny/month</label><input data-income="extraShiny" type="number" min="0" value="${esc(settings.extraShiny)}"></div>
+            <div class="ore-input"><label>Extra glowy/month</label><input data-income="extraGlowy" type="number" min="0" value="${esc(settings.extraGlowy)}"></div>
+            <div class="ore-input"><label>Extra starry/month</label><input data-income="extraStarry" type="number" min="0" value="${esc(settings.extraStarry)}"></div>
+          </div>
+        </details>
+        <div class="ore-inputs">
+          <label class="ore-input"><span style="display:flex;gap:8px;align-items:center"><input data-income="traderOres" type="checkbox" ${settings.traderOres?"checked":""} style="width:auto"> Buy weekly trader ores with raid medals</span></label>
+          <label class="ore-input"><span style="display:flex;gap:8px;align-items:center"><input data-income="freeGlowy" type="checkbox" ${settings.freeGlowy?"checked":""} style="width:auto"> Claim weekly free Glowy Ore</span></label>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="label">Star bonus</div><div class="big">${fmtOre(parts.star.shiny)} / ${fmtOre(parts.star.glowy)} / ${fmtOre(parts.star.starry)}</div><div class="small">Shiny / Glowy / Starry</div></div>
+          <div class="stat-card"><div class="label">Regular wars</div><div class="big">${fmtOre(parts.war.shiny)} / ${fmtOre(parts.war.glowy)} / ${fmtOre(parts.war.starry)}</div><div class="small">Uses your war count and win rate</div></div>
+          <div class="stat-card"><div class="label">CWL</div><div class="big">${fmtOre(parts.cwl.shiny)} / ${fmtOre(parts.cwl.glowy)} / ${fmtOre(parts.cwl.starry)}</div><div class="small">Editable attack reward values</div></div>
+          <div class="stat-card"><div class="label">Trader/free/extras</div><div class="big">${fmtOre(parts.trader.shiny+parts.free.shiny+parts.extra.shiny)} / ${fmtOre(parts.trader.glowy+parts.free.glowy+parts.extra.glowy)} / ${fmtOre(parts.trader.starry+parts.free.starry+parts.extra.starry)}</div><div class="small">Raid medals, free Glowy, and manual extras</div></div>
+        </div>
+        <div class="btn-row"><button type="button" class="btn-primary" data-income-save>Save estimate settings</button><button type="button" class="btn-ghost" data-income-reset>Reset defaults</button></div>
+      </div>
+    </details>`;
+  const collect=()=>{
+    const next={...settings};
+    box.querySelectorAll("[data-income]").forEach(input=>{
+      const key=input.getAttribute("data-income");
+      if (input.type === "checkbox") next[key]=input.checked;
+      else next[key]=input.value;
+    });
+    return next;
+  };
+  const rerender=(save=true)=>{
+    const next=collect();
+    if (save) saveOreIncomeSettings(next);
+    renderOreIncomeEstimator(root,equipment);
+  };
+  box.querySelectorAll("[data-income]").forEach(input=>{
+    input.addEventListener("change",()=>rerender(true));
+    if (input.tagName === "INPUT" && input.type !== "checkbox") input.addEventListener("input",()=>rerender(true));
+  });
+  const saveBtn=box.querySelector("[data-income-save]");
+  if (saveBtn) saveBtn.addEventListener("click",()=>{ saveOreIncomeSettings(collect()); setStatus("Saved monthly ore estimate settings"); renderOreIncomeEstimator(root,equipment); });
+  const resetBtn=box.querySelector("[data-income-reset]");
+  if (resetBtn) resetBtn.addEventListener("click",()=>{ saveOreIncomeSettings(DEFAULT_ORE_INCOME); setStatus("Reset monthly ore estimate settings"); renderOreIncomeEstimator(root,equipment); });
+}
+
 const SUPERCHARGE_INFO = {
   1000004:{name:"Gold Mine",maxCharge:3,kind:"Collector"},
   1000002:{name:"Elixir Collector",maxCharge:3,kind:"Collector"},
@@ -607,11 +967,13 @@ function fandomFileForName(name, level){
   return String(name || "Clash of Clans").replace(/\./g,"").replace(/&/g,"and").trim().replace(/\s+/g,"_") + ".png";
 }
 function iconUrl(name, level){
-  return "https://clashofclans.fandom.com/wiki/Special:Redirect/file/" + encodeURIComponent(fandomFileForName(name,level));
+  return "";
 }
 function iconMarkup(name, level){
+  // External wiki thumbnails were unreliable on GitHub Pages and sometimes matched the wrong file.
+  // Use stable local text badges instead, so the tracker never shows a broken or incorrect image.
   const initials=iconInitials(name);
-  return `<span class="asset-thumb"><img loading="lazy" referrerpolicy="no-referrer" src="${esc(iconUrl(name,level))}" alt="${esc(name)} icon" onerror="this.parentElement.classList.add('fallback')"><span>${esc(initials)}</span></span>`;
+  return `<span class="asset-thumb fallback"><span>${esc(initials)}</span></span>`;
 }
 function assetLine(name, level, extra=""){
   return `<div class="asset-line">${iconMarkup(name,level)}<div>${extra || `<div>${esc(name)}</div>`}</div></div>`;
@@ -864,14 +1226,14 @@ function renderEquipmentMinimums(equipment){
     groups[m.hero].push({key,...m});
   }
   const order=["Barbarian King","Archer Queen","Minion Prince","Grand Warden","Royal Champion","Dragon Duke"];
-  let html=`<div class="rec-head"><h3>Recommended minimum levels</h3><div class="equip-meta">Baseline targets from current guide sources; max your main gear after these floors.</div></div>`;
+  let html=`<div class="rec-head"><h3>Recommendation guide</h3><div class="equip-meta">Optional reference targets. These only match automatically after an equipment ID has a known or saved name.</div></div>`;
   for (const hero of order){
     const rows=groups[hero] || [];
     if (!rows.length) continue;
     html += `<details class="cat"><summary><span class="cat-name">${esc(hero)}</span><span class="cat-count">${rows.length} equipment</span><span class="chev">▸</span></summary><div class="rec-grid">`;
     for (const m of rows){
       const owned=byName.get(normName(m.display));
-      const status=owned ? (owned.level >= m.min ? `<span class="equip-ok">Current ${owned.level}: meets min</span>` : `<span class="equip-warning">Current ${owned.level}: needs ${m.min-owned.level} more</span>`) : `<span class="equip-meta">Not detected / rename ID to match</span>`;
+      const status=owned ? (owned.level >= m.min ? `<span class="equip-ok">Current ${owned.level}: meets min</span>` : `<span class="equip-warning">Current ${owned.level}: needs ${m.min-owned.level} more</span>`) : `<span class="equip-meta">Not matched yet</span>`;
       html += `<div class="rec-card">
         <div class="rec-title">${iconMarkup(m.display,m.max)}<span>${esc(m.display)}</span></div>
         <div class="rec-sub">${esc(m.rarity)} - recommended min ${m.min}/${m.max}</div>
@@ -885,30 +1247,59 @@ function renderEquipmentMinimums(equipment){
 }
 
 function renderEquipmentTab(equipment, oreData){
+  window.__warRoomCurrentEquipment = equipment || [];
   const summary=document.getElementById("equipmentSummary");
   const listEl=document.getElementById("equipmentList");
   if (!summary || !listEl) return;
-  const ores=oreData?.ores || {shiny:null,glowy:null,starry:null};
+  const detectedOres=oreData?.ores || {shiny:null,glowy:null,starry:null};
   const total=equipment.length;
   const maxed=equipment.filter(e=>e.level>=e.max).length;
   const withMin=equipment.filter(e=>e.minRecommended != null);
   const atMin=withMin.filter(e=>e.level>=e.minRecommended).length;
   const avg=total ? Math.round(equipment.reduce((s,e)=>s+(e.level/e.max),0)/total*100) : 0;
+  const idOnly=equipment.filter(e=>e.nameSource === "fallback" && e.id != null).length;
   renderEquipmentMinimums(equipment);
+  const oreValue = {
+    shiny: displayOreValue("shiny", detectedOres.shiny),
+    glowy: displayOreValue("glowy", detectedOres.glowy),
+    starry: displayOreValue("starry", detectedOres.starry)
+  };
   summary.innerHTML=`
     <div class="stat-grid">
       <div class="stat-card"><div class="label">Equipment found</div><div class="big">${total}</div><div class="small">From equipment/gear fields in your JSON</div></div>
       <div class="stat-card"><div class="label">Maxed</div><div class="big">${maxed}/${total || 0}</div><div class="small">Common cap 18, Epic cap 27</div></div>
-      <div class="stat-card"><div class="label">At recommended min</div><div class="big">${atMin}/${withMin.length || 0}</div><div class="small">Only known/renamed equipment</div></div>
+      <div class="stat-card"><div class="label">Named IDs</div><div class="big">${total-idOnly}/${total || 0}</div><div class="small">Use the dropdowns below for ID-only rows</div></div>
+      <div class="stat-card"><div class="label">At recommended min</div><div class="big">${atMin}/${withMin.length || 0}</div><div class="small">Only known/named equipment</div></div>
       <div class="stat-card"><div class="label">Average progress</div><div class="big">${avg}%</div><div class="small">Based on detected equipment only</div></div>
     </div>
-    <div class="ore-inputs">
-      <div class="ore-input"><label>Shiny Ore</label><input value="${ores.shiny ?? "not detected"}" readonly></div>
-      <div class="ore-input"><label>Glowy Ore</label><input value="${ores.glowy ?? "not detected"}" readonly></div>
-      <div class="ore-input"><label>Starry Ore</label><input value="${ores.starry ?? "not detected"}" readonly></div>
+    <div class="rec-head" style="margin-top:14px">
+      <h3>Type how much ore you have</h3>
+      <div class="equip-meta">Enter your current ore balances. These save automatically on this browser and power the monthly estimate.</div>
     </div>
-    <div class="notice" style="display:block">Ores are read only if the export includes ore fields. If an equipment card says Common/Epic equipment plus an ID, use the rename box on that card once. The name saves in this browser.</div>`;
-  listEl.innerHTML="";
+    <div class="ore-inputs">
+      <div class="ore-input"><label>Shiny Ore</label><input data-ore-input="shiny" inputmode="numeric" type="number" min="0" step="1" value="${esc(oreValue.shiny || "")}" placeholder="type how much you have"><div class="small">${detectedOres.shiny != null ? `Export detected: ${fmtOre(detectedOres.shiny)}` : `Export did not include this ore.`}</div></div>
+      <div class="ore-input"><label>Glowy Ore</label><input data-ore-input="glowy" inputmode="numeric" type="number" min="0" step="1" value="${esc(oreValue.glowy || "")}" placeholder="type how much you have"><div class="small">${detectedOres.glowy != null ? `Export detected: ${fmtOre(detectedOres.glowy)}` : `Export did not include this ore.`}</div></div>
+      <div class="ore-input"><label>Starry Ore</label><input data-ore-input="starry" inputmode="numeric" type="number" min="0" step="1" value="${esc(oreValue.starry || "")}" placeholder="type how much you have"><div class="small">${detectedOres.starry != null ? `Export detected: ${fmtOre(detectedOres.starry)}` : `Export did not include this ore.`}</div></div>
+    </div>
+    <div class="notice" style="display:block">Your export does not always include ore balances or equipment names. Type your ores here and choose names for equipment IDs once; both save in this browser.</div>
+    <div id="oreIncomeEstimator" class="equip-card" style="margin-top:14px"></div>`;
+  const saveTypedOres = () => {
+    const manual={};
+    summary.querySelectorAll("[data-ore-input]").forEach(input=>{
+      const key=input.getAttribute("data-ore-input");
+      const val=String(input.value || "").trim();
+      if (val) manual[key]=val;
+    });
+    saveManualOres(manual);
+    renderOreIncomeEstimator(summary,equipment);
+  };
+  summary.querySelectorAll("[data-ore-input]").forEach(input=>{
+    input.addEventListener("input", saveTypedOres);
+    input.addEventListener("change", () => { saveTypedOres(); setStatus("Saved ore values on this browser"); });
+  });
+  renderOreIncomeEstimator(summary,equipment);
+
+  listEl.innerHTML=`<div class="rec-head"><h3>Your detected equipment</h3><div class="equip-meta">These are the actual equipment entries from your export. Pick a name for any ID-only row and the guide below will start matching it.</div></div>`;
   if (!equipment.length){
     listEl.innerHTML=`<div class="equip-card"><div class="equip-name">No equipment entries found</div><div class="equip-meta">Your export may not expose equipment, or it may use a new field name. Paste an export/API JSON that contains hero equipment and this tab will list it.</div></div>`;
     return;
@@ -919,23 +1310,25 @@ function renderEquipmentTab(equipment, oreData){
     const div=document.createElement("div");
     div.className="equip-card";
     const needsName = eq.nameSource === "fallback" && eq.id != null;
+    const picker = needsName ? `<div class="equip-editor">${equipmentSelectHtml(eq.id, eq.max)}<button data-eq-save="${eq.id}" type="button">Save name</button></div><div class="hintline">Pick the matching equipment from the list. The public export usually gives gear as raw IDs, so this saves the mapping locally.</div>` : "";
     div.innerHTML=`
       <div class="equip-top">
         ${assetLine(eq.name, eq.max, `<div class="equip-name">${esc(eq.name)}</div><div class="equip-meta">${esc(eq.hero)} - level ${eq.level}/${eq.max}${eq.id != null ? ` - ID ${eq.id}` : ""}</div>`)}
         <div class="badge-row"><span class="badge ${String(eq.rarity).toLowerCase().includes("epic")?"epic":"common"}">${esc(eq.rarity)}</span>${eq.equipped?`<span class="badge ore">Equipped</span>`:""}</div>
       </div>
-      <div class="equip-rec">${eq.minRecommended != null ? `<span>Recommended minimum: <strong>level ${eq.minRecommended}</strong></span>${eq.level < eq.minRecommended ? `<span class="equip-warning">Needs ${eq.minRecommended-eq.level} more</span>` : `<span class="equip-ok">Meets minimum</span>`}` : `<span>Rename this equipment to show a recommended minimum.</span>`}</div>
+      <div class="equip-rec">${eq.minRecommended != null ? `<span>Recommended minimum: <strong>level ${eq.minRecommended}</strong></span>${eq.level < eq.minRecommended ? `<span class="equip-warning">Needs ${eq.minRecommended-eq.level} more</span>` : `<span class="equip-ok">Meets minimum</span>`}` : `<span>Choose the name below to show a recommended minimum.</span>`}</div>
       ${eq.minNote ? `<div class="rec-note">${esc(eq.minNote)}</div>` : ""}
       <div class="bar"><i class="${full?"full":"lab-bar"}" style="width:${pct}%"></i></div>
-      ${needsName ? `<div class="equip-editor"><input data-eq-name-input="${eq.id}" placeholder="Rename this ID, example: Eternal Tome"><button data-eq-save="${eq.id}" type="button">Save name</button></div><div class="hintline">The Clash export gives this as an ID only, so this lets you label it manually.</div>` : ""}`;
+      ${picker}`;
     listEl.appendChild(div);
     const saveBtn = div.querySelector(`[data-eq-save="${eq.id}"]`);
     if (saveBtn){
       saveBtn.addEventListener("click",()=>{
-        const input=div.querySelector(`[data-eq-name-input="${eq.id}"]`);
-        saveEquipmentNameOverride(eq.id,input?.value || "");
+        const select=div.querySelector(`[data-eq-select="${eq.id}"]`);
+        saveEquipmentNameOverride(eq.id,select?.value || "");
         const raw=document.getElementById("jsonInput")?.value?.trim();
         if (raw) render(analyze(raw));
+        setStatus(`Saved equipment name for ID ${eq.id}`);
       });
     }
   }
@@ -1207,6 +1600,11 @@ document.addEventListener("DOMContentLoaded", function() {
   setupTabs();
   setStatus("Ready. Paste your export or load sample data.");
 });
+
+
+// Defensive: this version intentionally uses no external photos.
+function removeAnyImages(){ document.querySelectorAll("img").forEach(img => img.remove()); }
+window.addEventListener("load", removeAnyImages);
 
 </script>
 </body>
