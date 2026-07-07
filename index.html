@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Superclash Planner - Version 16</title>
+<title>Superclash Planner - Version 17</title>
 <style>
   :root {
     --bg:#080b12; --bg2:#0d1320; --card:#131a2a; --card2:#171f31; --line:rgba(148,163,184,.18);
@@ -49,15 +49,27 @@
   .auth-actions{display:flex;gap:8px;flex-wrap:wrap}.auth-actions .btn{padding:10px 13px;border-radius:12px;font-size:13px}
   .auth-dot{width:10px;height:10px;border-radius:50%;background:var(--muted2);display:inline-block;margin-right:6px}.auth-dot.on{background:var(--accent2)}
 
+  /* v17 professional declutter pass */
+  :root{--bg:#070a12;--card:#101827;--card2:#121c2d;--line:rgba(148,163,184,.16);--accent:#7c3aed;--accent2:#14b8a6;--radius:16px}
+  .wrap{max-width:980px;padding:18px 14px 56px}.hero{margin:6px 0 10px}.logo{width:40px;height:40px;border-radius:12px}.brand{gap:10px}h1{font-size:clamp(26px,5vw,40px);letter-spacing:-.035em}.sub{font-size:13px;max-width:620px}.version{font-size:11px;padding:6px 9px;color:#dbeafe;border-color:rgba(96,165,250,.28);background:rgba(37,99,235,.08)}
+  .auth-card{padding:12px 14px;margin-bottom:10px}.auth-title{font-size:14px}.auth-sub{font-size:12px}.auth-actions .btn{padding:9px 11px;font-size:12px}
+  .tabs{margin:10px 0 12px;padding:7px 0;gap:7px}.tab{padding:9px 13px;font-size:13px;border-radius:14px}.card{padding:15px;border-radius:16px;box-shadow:none;background:linear-gradient(180deg,rgba(17,24,39,.92),rgba(11,18,32,.92))}.card.soft{background:rgba(17,24,39,.62)}
+  .section-title{font-size:20px}.section-sub{font-size:13px;margin-bottom:12px}.import-card summary{padding:14px 15px}.import-card textarea{min-height:112px;max-height:210px}.actions-row{margin-top:10px}.btn{padding:11px 14px;border-radius:12px;font-size:14px}
+  .stat-grid{grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px}.summary-stats{margin-top:8px}.stat{padding:13px;border-radius:15px;background:rgba(8,13,24,.70)}.stat .label{font-size:10px}.stat .value{font-size:26px}.stat .hint{font-size:12px}.compact-card{padding:16px;margin-top:10px}.compact-queue .item:nth-child(n+6){display:none}
+  .item{padding:11px;border-radius:14px;gap:10px}.badge{width:34px;height:34px;border-radius:10px;font-size:12px}.rank{font-size:20px}.item-title{font-size:14px}.item-meta,.mini{font-size:12px}.pill{font-size:10px;padding:4px 7px}.bar{height:7px}.queue{gap:8px}
+  details{border-radius:15px;margin:8px 0;background:rgba(17,24,39,.50)}summary{padding:12px 13px}.details-body{padding:0 13px 13px}.calc-help{display:grid;gap:8px;margin:10px 0}.calc-box{border:1px solid var(--line);background:rgba(8,13,24,.48);border-radius:14px;padding:12px}.calc-box h3{font-size:14px;margin-bottom:4px}.calc-box p{color:var(--muted);font-size:12px;line-height:1.45}.timer-list{display:grid;gap:8px;margin-top:8px}.timer-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:8px;color:var(--muted);font-size:12px}.timer-row b{color:var(--text)}
+  .equip-grid,.source-grid{gap:9px}.equip-card,.source-card{border-radius:14px;padding:11px}.ore-fields input{padding:8px 6px}.cost-row{font-size:12px}
+  @media(max-width:520px){.wrap{padding-left:12px;padding-right:12px}.topline{align-items:flex-start}.sub{display:none}.tabs{position:sticky}.auth-actions{width:100%}.auth-actions .btn{flex:1}.stat-grid{grid-template-columns:1fr}.item{grid-template-columns:auto 1fr}.item .pill{justify-self:start}.source-grid,.equip-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="hero"><div class="topline"><div class="brand"><div class="logo">SC</div><div><h1>Superclash Planner</h1><p class="sub">Clean version: village upgrades from your export, manual equipment levels, ores/month planner, cloud save, and supercharges. No photos, no raw equipment ID clutter.</p></div></div><div class="version">Version 16 - accounts + cloud save</div></div></header>
+  <header class="hero"><div class="topline"><div class="brand"><div class="logo">SC</div><div><h1>Superclash Planner</h1><p class="sub">A clean upgrade dashboard for village progress, manual equipment, ores, cloud save, and supercharges.</p></div></div><div class="version">v17 professional layout</div></div></header>
   <section class="card soft auth-card" id="authPanel">
     <div class="auth-left">
       <div class="auth-title"><span class="auth-dot" id="authDot"></span><span id="authTitle">Not signed in</span></div>
-      <div class="auth-sub" id="authSub">Browser saves still work. Sign in to sync equipment, ores, source cards, and your last export across devices.</div>
+      <div class="auth-sub" id="authSub">Sign in to sync equipment, ores, source cards, and your last export.</div>
     </div>
     <div class="auth-actions">
       <button class="btn" id="signInBtn" type="button">Sign in with Google</button>
@@ -66,11 +78,32 @@
       <button class="btn secondary" id="signOutBtn" type="button" style="display:none">Sign out</button>
     </div>
   </section>
-  <nav class="tabs" aria-label="Planner tabs"><button class="tab active" data-panel="village">Village upgrades</button><button class="tab" data-panel="equipment">Equipment + ores</button><button class="tab" data-panel="supercharges">Supercharges</button></nav>
-  <section class="panel active" id="panel-village"><div class="card"><div class="section-title">Paste your Clash export</div><p class="section-sub">This only reads Home Village upgrade data. Equipment is now manual-only to avoid bad or missing export detection.</p><textarea id="jsonInput" placeholder='Paste your Clash of Clans Data Export JSON here'></textarea><div class="row" style="margin-top:12px"><button class="btn" id="analyzeBtn">Analyze village</button><button class="btn secondary" id="sampleBtn">Load sample</button></div><div id="status" class="notice" style="display:none"></div></div><div id="villageResults" style="display:none"><div class="stat-grid"><div class="stat"><div class="label">Town Hall</div><div class="value" id="thValue">?</div><div class="hint" id="thHint"></div></div><div class="stat"><div class="label">Progress</div><div class="value" id="progressValue">0%</div><div class="hint">Mapped upgrade types only</div></div><div class="stat"><div class="label">Maxed types</div><div class="value" id="maxedValue">0/0</div><div class="hint">Tracked item categories</div></div><div class="stat"><div class="label">Running</div><div class="value" id="runningValue">0</div><div class="hint">Upgrades with timers</div></div></div><div class="card"><div class="section-title">Next upgrades</div><p class="section-sub">Short priority list only. The detailed categories are tucked below.</p><div id="queueList" class="queue"></div></div><div id="categoryList"></div></div></section>
+  <nav class="tabs" aria-label="Planner tabs"><button class="tab active" data-panel="village">Village</button><button class="tab" data-panel="equipment">Equipment + ores</button><button class="tab" data-panel="supercharges">Supercharges</button></nav>
+  <section class="panel active" id="panel-village">
+    <details class="card import-card" open>
+      <summary>Village export <span class="mini">Paste JSON, then analyze</span></summary>
+      <div class="details-body">
+        <p class="section-sub">Reads Home Village upgrades only. Equipment stays manual so missing export gear does not mess up your ore planner.</p>
+        <textarea id="jsonInput" placeholder='Paste your Clash of Clans Data Export JSON here'></textarea>
+        <div class="row actions-row"><button class="btn" id="analyzeBtn">Analyze village</button><button class="btn secondary" id="sampleBtn">Load sample</button></div>
+        <div id="status" class="notice" style="display:none"></div>
+      </div>
+    </details>
+    <div id="villageResults" style="display:none">
+      <div class="stat-grid summary-stats">
+        <div class="stat"><div class="label">Town Hall</div><div class="value" id="thValue">?</div><div class="hint" id="thHint"></div></div>
+        <div class="stat"><div class="label">Level completion</div><div class="value" id="progressValue">0%</div><div class="hint">Current mapped levels / TH caps</div></div>
+        <div class="stat"><div class="label">Maxed groups</div><div class="value" id="maxedValue">0/0</div><div class="hint">Mapped item groups at cap</div></div>
+        <div class="stat"><div class="label">Active timers</div><div class="value" id="runningValue">0</div><div class="hint">Detected timer fields</div></div>
+      </div>
+      <div id="calcExplainer"></div>
+      <div class="card compact-card"><div class="section-title">Upgrade focus</div><p class="section-sub">Top priorities only. Full category lists are collapsed underneath.</p><div id="queueList" class="queue compact-queue"></div></div>
+      <div id="categoryList"></div>
+    </div>
+  </section>
   <section class="panel" id="panel-equipment"><div class="card"><div class="section-title">Manual equipment levels</div><p class="section-sub">Type your current level for each equipment. Use <b>0</b> or leave blank for gear you do not own or do not want counted.</p><div class="row"><button class="btn secondary" id="clearGearBtn">Clear all equipment levels</button></div><div id="equipmentManualList"></div></div><div class="card"><div class="section-title">Current ores</div><p class="section-sub">Type how much ore you have right now. These save automatically on this browser.</p><div class="grid three"><label>Shiny Ore<input type="number" min="0" step="1" id="oreShiny" placeholder="type amount"></label><label>Glowy Ore<input type="number" min="0" step="1" id="oreGlowy" placeholder="type amount"></label><label>Starry Ore<input type="number" min="0" step="1" id="oreStarry" placeholder="type amount"></label></div></div><div class="card"><div class="section-title">Ore tracker sources</div><p class="section-sub">Monthly gain cards like Clashify. Edit the totals for each source and turn off anything you do not use.</p><div class="grid two"><label>Goal<select id="oreGoal"><option value="max">Max all entered equipment</option><option value="minimum">Recommended minimums first</option></select></label><div class="row" style="align-items:end"><button class="btn secondary" id="resetOreSourcesBtn" type="button">Reset source values</button></div></div><div id="oreSourceGrid" class="source-grid"></div></div><div class="card"><div class="section-title">Finish estimate</div><p class="section-sub">Uses your current ore balance, the source cards above, and the manual equipment levels.</p><div id="orePlannerResults"></div></div></section>
   <section class="panel" id="panel-supercharges"><div class="card"><div class="section-title">Supercharges</div><p class="section-sub">Analyze your village first. This shows eligible max-level buildings and any charge levels exposed in the export. If the export does not expose charge fields, it assumes charge 0.</p><div id="superchargeResults" class="queue"></div></div></section>
-  <footer>Version 16. No external images. Manual equipment levels, Clashify-style ore source cards, and optional Firebase cloud save.</footer>
+  <footer>Version 17. Cleaner dashboard, clearer calculations, manual equipment, ore source cards, and optional Firebase cloud save.</footer>
 </div>
 <script>
 "use strict";
@@ -345,6 +378,7 @@ function initials(name){const words=String(name||"?").replace(/[^A-Za-z0-9 ]/g,"
 function normName(s){return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();}
 function getMaxForTH(info,th){if(!info)return null;if(info.maxByTh){return info.maxByTh[th] ?? info.maxByTh[String(th)] ?? info.maxByTh[18] ?? info.maxByTh[17] ?? null;}return info.max ?? null;}
 function setStatus(msg,bad=false){const el=$("status"); el.style.display="block"; el.className="notice"+(bad?" error":""); el.textContent=msg;}
+function formatDuration(seconds){seconds=Math.max(0,Math.floor(num(seconds))); const d=Math.floor(seconds/86400); const h=Math.floor((seconds%86400)/3600); const m=Math.floor((seconds%3600)/60); if(d>0)return `${d}d ${h}h`; if(h>0)return `${h}h ${m}m`; return `${m}m`;}
 function harvest(node,out){ if(Array.isArray(node)){node.forEach(n=>harvest(n,out));return;} if(node && typeof node==="object"){ if(typeof node.data==="number" && typeof node.lvl==="number"){out.push({data:node.data,lvl:node.lvl,cnt:typeof node.cnt==="number"?node.cnt:1,timer:node.timer,raw:node});} for(const k in node) harvest(node[k],out); }}
 function harvestHomeVillage(json,out){["buildings","heroes","units","spells","pets","traps"].forEach(k=>{if(json && json[k]) harvest(json[k],out);});}
 function analyzeVillage(raw){
@@ -352,17 +386,79 @@ function analyzeVillage(raw){
   const entries=[]; harvestHomeVillage(json,entries); if(!entries.length) throw new Error("I found no Home Village {data, lvl} entries. Check that you pasted the full export.");
   const byId=new Map(); entries.forEach(e=>{if(!byId.has(e.data))byId.set(e.data,[]);byId.get(e.data).push(e);});
   const thList=byId.get(1000001)||[]; const thLvl=thList.length?Math.max(...thList.map(e=>e.lvl)):null; const items=[];
-  for(const [id,list] of byId){ const info=ITEMS[id]; if(!info) continue; const max=getMaxForTH(info,thLvl); const total=list.reduce((s,e)=>s+(e.cnt||1),0); let below=0,minLvl=Infinity,maxLvlSeen=0,upgrading=0,done=0,cap=0; for(const e of list){const c=e.cnt||1; minLvl=Math.min(minLvl,e.lvl); maxLvlSeen=Math.max(maxLvlSeen,e.lvl); if(e.timer!=null)upgrading+=c; if(max!=null&&e.lvl<max)below+=c; if(max!=null){done+=Math.min(e.lvl,max)*c;cap+=max*c;}} items.push({id:Number(id),...info,max,total,below,minLvl,maxLvlSeen,upgrading,done,cap,remaining:max!=null?list.reduce((s,e)=>s+Math.max(0,max-e.lvl)*(e.cnt||1),0):0}); }
+  for(const [id,list] of byId){ const info=ITEMS[id]; if(!info) continue; const max=getMaxForTH(info,thLvl); const total=list.reduce((s,e)=>s+(e.cnt||1),0); let below=0,minLvl=Infinity,maxLvlSeen=0,upgrading=0,done=0,cap=0; for(const e of list){const c=e.cnt||1; minLvl=Math.min(minLvl,e.lvl); maxLvlSeen=Math.max(maxLvlSeen,e.lvl); if(e.timer!=null)upgrading+=c; if(max!=null&&e.lvl<max)below+=c; if(max!=null){done+=Math.min(e.lvl,max)*c;cap+=max*c;}} items.push({id:Number(id),...info,max,total,below,minLvl,maxLvlSeen,upgrading,done,cap,timers:list.filter(e=>e.timer!=null).map(e=>({lvl:e.lvl,cnt:e.cnt||1,seconds:Number(e.timer)||0})),remaining:max!=null?list.reduce((s,e)=>s+Math.max(0,max-e.lvl)*(e.cnt||1),0):0}); }
   return {json,byId,thLvl,items,supercharges:analyzeSupercharges(byId,thLvl)};
 }
-function buildQueue(items){return items.filter(i=>i.max!=null&&i.below>0&&i.cat!=="wall").sort((a,b)=>{const pa=a.prio??(a.labPrio? a.labPrio*4:10),pb=b.prio??(b.labPrio?b.labPrio*4:10);return pb-pa || (b.max-b.minLvl)-(a.max-a.minLvl);}).slice(0,7);}
+function buildQueue(items){return items.filter(i=>i.max!=null&&i.below>0&&i.cat!=="wall").sort((a,b)=>{const pa=a.prio??(a.labPrio? a.labPrio*4:10),pb=b.prio??(b.labPrio?b.labPrio*4:10);return pb-pa || (b.max-b.minLvl)-(a.max-a.minLvl);}).slice(0,5);}
 function renderVillage(result){
-  lastVillageResult=result; localStorage.setItem("warRoomLastExport",$("jsonInput").value.trim()); const tracked=result.items.filter(i=>i.max!=null), done=tracked.reduce((s,i)=>s+i.done,0), cap=tracked.reduce((s,i)=>s+i.cap,0), pct=cap?Math.round(done/cap*100):0;
-  $("villageResults").style.display="block"; $("thValue").textContent=result.thLvl||"?"; $("thHint").textContent=result.thLvl?`Using TH${result.thLvl} caps`:"Town Hall not detected"; $("progressValue").textContent=pct+"%"; $("maxedValue").textContent=`${tracked.filter(i=>i.below===0).length}/${tracked.length}`; $("runningValue").textContent=result.items.reduce((s,i)=>s+i.upgrading,0);
-  const q=$("queueList"); q.innerHTML=""; const queue=buildQueue(result.items); if(!queue.length) q.innerHTML='<div class="notice">No unfinished tracked upgrades found.</div>';
-  queue.forEach((it,idx)=>{const div=document.createElement("div");div.className="item";div.innerHTML=`<div class="rank">${idx+1}</div><div><div class="item-title">${esc(it.name)}</div><div class="item-meta">${it.total>1?`${it.below}/${it.total} below max - low lvl ${it.minLvl}/${it.max}`:`lvl ${it.minLvl} to ${it.max}`}</div>${it.why?`<div class="mini">${esc(it.why)}</div>`:""}</div><span class="pill">${esc(it.cat)}</span><div class="bar"><i style="width:${Math.round(it.done/it.cap*100)}%"></i></div>`;q.appendChild(div);});
-  const catEl=$("categoryList"); catEl.innerHTML=""; CATS.forEach(cat=>{const list=result.items.filter(i=>i.cat===cat.id); if(!list.length)return; list.sort((a,b)=>(b.prio??(b.labPrio??0)*4)-(a.prio??(a.labPrio??0)*4)); const trackedC=list.filter(i=>i.max!=null); const details=document.createElement("details"); if(cat.id==="core"||cat.id==="hero") details.open=true; details.innerHTML=`<summary>${esc(cat.label)} <span class="mini">${trackedC.filter(i=>i.below===0).length}/${trackedC.length} maxed</span></summary><div class="details-body grid"></div>`; const body=details.querySelector(".details-body"); list.forEach(it=>{const div=document.createElement("div");div.className="item";const full=it.max!=null&&it.below===0;const pct=it.cap?Math.round(it.done/it.cap*100):100;div.innerHTML=`<div class="badge">${initials(it.name)}</div><div><div class="item-title">${esc(it.name)}${it.upgrading?" <span class='mini'>upgrading</span>":""}</div><div class="item-meta">${it.max!=null?(it.total>1?(full?`all ${it.total} maxed (${it.max})`:`${it.below}/${it.total} to go - low ${it.minLvl}/${it.max}`):(full?`maxed ${it.max}`:`${it.minLvl}/${it.max}`)):`lvl ${it.maxLvlSeen}`}</div></div><span class="pill ${full?'green':''}">${full?'done':'todo'}</span><div class="bar"><i class="${full?'full':''}" style="width:${pct}%"></i></div>`;body.appendChild(div);}); catEl.appendChild(details);});
-  renderSupercharges(result.supercharges); setStatus(`Analyzed TH${result.thLvl||"?"}. Equipment stays manual in the Equipment tab.`);
+  lastVillageResult=result;
+  localStorage.setItem("warRoomLastExport",$("jsonInput").value.trim());
+  const tracked=result.items.filter(i=>i.max!=null);
+  const done=tracked.reduce((s,i)=>s+i.done,0);
+  const cap=tracked.reduce((s,i)=>s+i.cap,0);
+  const pct=cap?Math.round(done/cap*100):0;
+  const maxedCount=tracked.filter(i=>i.below===0).length;
+  const timerRows=result.items.flatMap(i=>(i.timers||[]).map(t=>({name:i.name,cat:i.cat,lvl:t.lvl,cnt:t.cnt,seconds:t.seconds})));
+  const activeTimerCount=timerRows.reduce((s,t)=>s+t.cnt,0);
+
+  $("villageResults").style.display="block";
+  $("thValue").textContent=result.thLvl||"?";
+  $("thHint").textContent=result.thLvl?`Using TH${result.thLvl} caps`:"Town Hall not detected";
+  $("progressValue").textContent=pct+"%";
+  $("maxedValue").textContent=`${maxedCount}/${tracked.length}`;
+  $("runningValue").textContent=activeTimerCount;
+
+  const explain=$("calcExplainer");
+  if(explain){
+    const timerHtml=timerRows.length
+      ? `<details><summary>Active timer list <span class="mini">${activeTimerCount} detected</span></summary><div class="details-body timer-list">${timerRows.map(t=>`<div class="timer-row"><span><b>${esc(t.name)}</b> <span class="mini">lvl ${t.lvl}${t.cnt>1?` x${t.cnt}`:""} · ${esc(t.cat)}</span></span><span>${formatDuration(t.seconds)}</span></div>`).join("")}</div></details>`
+      : `<div class="notice">No active timer fields were detected in mapped Home Village items.</div>`;
+    explain.innerHTML=`<div class="calc-help">
+      <details>
+        <summary>How these numbers are calculated <span class="mini">Level-based, not time-based</span></summary>
+        <div class="details-body grid two">
+          <div class="calc-box"><h3>Level completion</h3><p>${pct}% = total current levels across mapped Home Village items divided by total TH cap levels. It is not weighted by upgrade time, cost, or importance.</p></div>
+          <div class="calc-box"><h3>Active timers</h3><p>${activeTimerCount} = mapped export entries that include a <b>timer</b> field. This can include buildings, heroes, lab, pets, or grouped entries; it is not meant to equal builder count.</p></div>
+        </div>
+      </details>
+      ${timerHtml}
+    </div>`;
+  }
+
+  const q=$("queueList");
+  q.innerHTML="";
+  const queue=buildQueue(result.items);
+  if(!queue.length) q.innerHTML='<div class="notice">No unfinished tracked upgrades found.</div>';
+  queue.forEach((it,idx)=>{
+    const div=document.createElement("div");
+    div.className="item";
+    const itemPct=it.cap?Math.round(it.done/it.cap*100):0;
+    div.innerHTML=`<div class="rank">${idx+1}</div><div><div class="item-title">${esc(it.name)}</div><div class="item-meta">${it.total>1?`${it.below}/${it.total} below max · lowest ${it.minLvl}/${it.max}`:`level ${it.minLvl} to ${it.max}`}</div>${it.why?`<div class="mini">${esc(it.why)}</div>`:""}</div><span class="pill">${esc(it.cat)}</span><div class="bar"><i style="width:${itemPct}%"></i></div>`;
+    q.appendChild(div);
+  });
+
+  const catEl=$("categoryList");
+  catEl.innerHTML="";
+  CATS.forEach(cat=>{
+    const list=result.items.filter(i=>i.cat===cat.id);
+    if(!list.length)return;
+    list.sort((a,b)=>(b.prio??(b.labPrio??0)*4)-(a.prio??(a.labPrio??0)*4));
+    const trackedC=list.filter(i=>i.max!=null);
+    const details=document.createElement("details");
+    details.innerHTML=`<summary>${esc(cat.label)} <span class="mini">${trackedC.filter(i=>i.below===0).length}/${trackedC.length} maxed</span></summary><div class="details-body grid"></div>`;
+    const body=details.querySelector(".details-body");
+    list.forEach(it=>{
+      const div=document.createElement("div");
+      div.className="item";
+      const full=it.max!=null&&it.below===0;
+      const itemPct=it.cap?Math.round(it.done/it.cap*100):100;
+      div.innerHTML=`<div class="badge">${initials(it.name)}</div><div><div class="item-title">${esc(it.name)}${it.upgrading?" <span class='mini'>timer</span>":""}</div><div class="item-meta">${it.max!=null?(it.total>1?(full?`all ${it.total} maxed (${it.max})`:`${it.below}/${it.total} to go · low ${it.minLvl}/${it.max}`):(full?`maxed ${it.max}`:`${it.minLvl}/${it.max}`)):`level ${it.maxLvlSeen}`}</div></div><span class="pill ${full?'green':''}">${full?'done':'todo'}</span><div class="bar"><i class="${full?'full':''}" style="width:${itemPct}%"></i></div>`;
+      body.appendChild(div);
+    });
+    catEl.appendChild(details);
+  });
+  renderSupercharges(result.supercharges);
+  setStatus(`Analyzed TH${result.thLvl||"?"}. Equipment levels are manual in the Equipment tab.`);
 }
 function extractChargeLevel(raw){ if(!raw||typeof raw!=="object") return 0; for(const k of ["supercharge","super_charge","superCharge","charge","charge_lvl","chargeLevel","supercharge_lvl","superchargeLevel","boost_lvl","boostLevel"]){const n=Number(raw[k]); if(Number.isFinite(n)) return Math.max(0,n);} return 0; }
 function analyzeSupercharges(byId,thLvl){const rows=[]; for(const [id,sc] of Object.entries(SUPERCHARGE_INFO)){const list=byId.get(Number(id))||[]; if(!list.length)continue; const info=ITEMS[id]; const standardMax=getMaxForTH(info,thLvl); let eligible=0,total=0,done=0,cap=0,min=Infinity,upgrading=0; for(const e of list){const c=e.cnt||1; total+=c; if(e.timer!=null)upgrading+=c; if(standardMax==null||e.lvl>=standardMax){eligible+=c;const ch=Math.min(extractChargeLevel(e.raw),sc.maxCharge);min=Math.min(min,ch);done+=ch*c;cap+=sc.maxCharge*c;}} if(eligible>0)rows.push({id:Number(id),...sc,total,eligible,done,cap,min:min===Infinity?0:min,upgrading});} return rows.sort((a,b)=>(a.cap?a.done/a.cap:1)-(b.cap?b.done/b.cap:1)||a.name.localeCompare(b.name));}
@@ -427,7 +523,7 @@ function getLocalSavePayload(){
   SAVE_KEYS.forEach(k => data[k] = localStorage.getItem(k) || "");
   const jsonInput = $id("jsonInput");
   if(jsonInput && jsonInput.value.trim()) data.warRoomLastExport = jsonInput.value.trim();
-  return { version: 16, updatedAt: serverTimestamp(), data };
+  return { version: 17, updatedAt: serverTimestamp(), data };
 }
 
 function applyCloudPayload(payload){
@@ -437,7 +533,7 @@ function applyCloudPayload(payload){
     if(typeof v === "string" && v.length) localStorage.setItem(k, v);
     else localStorage.removeItem(k);
   });
-  location.href = location.pathname + "?v=16-cloud-" + Date.now();
+  location.href = location.pathname + "?v=17-cloud-" + Date.now();
 }
 
 function userSaveRef(){
@@ -450,7 +546,7 @@ function updateAuthUI(user){
   const signedIn = !!currentUser;
   $id("authDot")?.classList.toggle("on", signedIn);
   if($id("authTitle")) $id("authTitle").textContent = signedIn ? `Signed in as ${currentUser.displayName || currentUser.email || "Google user"}` : "Not signed in";
-  if($id("authSub")) $id("authSub").textContent = signedIn ? "Cloud save is ready. Browser auto-save still works as a backup." : "Browser saves still work. Sign in to sync equipment, ores, source cards, and your last export across devices.";
+  if($id("authSub")) $id("authSub").textContent = signedIn ? "Cloud save is ready. Browser auto-save still works as a backup." : "Sign in to sync equipment, ores, source cards, and your last export.";
   if($id("signInBtn")) $id("signInBtn").style.display = signedIn ? "none" : "inline-block";
   if($id("signOutBtn")) $id("signOutBtn").style.display = signedIn ? "inline-block" : "none";
   if($id("cloudSaveBtn")) $id("cloudSaveBtn").disabled = !signedIn;
