@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CoC Upgrade Advisor — Fixed Modern</title>
+<title>CoC Upgrade Advisor — Clean Home Village</title>
 <style>
   :root {
     --bg:#080b12;
@@ -152,7 +152,7 @@
     <div class="hero-card">
       <div class="kicker">TH17/TH18 Upgrade Advisor</div>
       <h1><span class="gradient">CoC Upgrade Tracker</span></h1>
-      <p class="sub">Paste your village export and get a modern, TH-aware Home Village upgrade breakdown. This version ignores Builder Base and side-system IDs so the unmapped list stays useful.</p>
+      <p class="sub">Paste your village export and get a modern, TH-aware Home Village upgrade breakdown. This clean version ignores Builder Base, helpers, equipment, decorations, and other side-system IDs.</p>
       <div class="header-actions">
         <span class="pill">No cursive fonts</span>
         <span class="pill">Safer button handling</span>
@@ -188,7 +188,7 @@
       </div>
       <div class="mini">
         <div class="label">Accuracy note</div>
-        <div class="value">Only Home Village data is analyzed. Builder Base, helpers, guardians, and decoration IDs are ignored so they do not spam the unmapped list.</div>
+        <div class="value">Only Home Village upgrade data is analyzed. Builder Base, helpers, guardians, equipment, and decoration IDs are ignored so they do not clutter the results.</div>
       </div>
     </aside>
   </main>
@@ -382,8 +382,7 @@ const CATS = [
   {id:"def",label:"🛡️ Defenses"},
   {id:"trap",label:"💣 Traps"},
   {id:"res",label:"💰 Resources"},
-  {id:"wall",label:"🧱 Walls"},
-  {id:"unknown",label:"⚠️ Unmapped / not yet tracked"}
+  {id:"wall",label:"🧱 Walls"}
 ];
 
 function num(v){
@@ -452,7 +451,8 @@ function analyze(raw){
   const items=[];
   for (const [id,list] of byId){
     const baseInfo = ITEMS[id];
-    const info = baseInfo || {name:`Unknown data ID ${id}`,cat:"unknown",unknown:true,prio:0};
+    if (!baseInfo) continue; // Ignore Builder Base / helper / equipment / unknown IDs so the main tracker stays clean.
+    const info = baseInfo;
     const total = list.reduce((s,e)=>s+e.cnt,0);
     const max = getMaxForTH(info, thLvl);
     let below=0,minLvl=Infinity,maxLvlSeen=0,upgrading=0;
@@ -508,24 +508,20 @@ function render(result){
     notice.textContent=`Heads up: this fixed table is mainly tuned for TH17/TH18. You are TH${thLvl}, so some lower-TH caps may be approximate.`;
   } else if (thLvl===18){
     notice.style.display="block";
-    notice.textContent="Using TH18 caps. Completion percent only counts mapped items with known max levels; unmapped newer IDs are listed separately.";
+    notice.textContent="Using TH18 caps. Completion percent counts tracked Home Village upgrades only.";
   } else if (thLvl===17){
     notice.style.display="block";
-    notice.textContent="Using TH17 caps. Completion percent only counts mapped items with known max levels; unmapped newer IDs are listed separately.";
+    notice.textContent="Using TH17 caps. Completion percent counts tracked Home Village upgrades only.";
   } else notice.style.display="none";
 
-  const unknowns=items.filter(i=>i.cat==="unknown");
   const unknownNotice=document.getElementById("unknownNotice");
-  if (unknowns.length){
-    unknownNotice.style.display="block";
-    unknownNotice.textContent=`Found ${unknowns.length} unmapped data ID${unknowns.length>1?"s":""}. This usually means a brand-new Home Village item or an ID missing from the mapping. They are shown at the bottom instead of ignored.`;
-  } else unknownNotice.style.display="none";
+  if (unknownNotice) unknownNotice.style.display="none";
 
   const q=buildQueue(items);
   const qEl=document.getElementById("queueList");
   qEl.innerHTML="";
   if (!q.length){
-    qEl.innerHTML=`<div class="order first"><div class="body"><div class="what">No tracked priority upgrades found 👑</div><div class="why">Either you're maxed for the mapped table, or the remaining items are unmapped IDs shown below.</div></div></div>`;
+    qEl.innerHTML=`<div class="order first"><div class="body"><div class="what">No tracked priority upgrades found 👑</div><div class="why">Either you're maxed for the tracked table, or the remaining items are ignored side-system IDs.</div></div></div>`;
   }
   q.forEach((it,i)=>{
     const div=document.createElement("div");
@@ -556,7 +552,7 @@ function render(result){
     const trackedCount=list.filter(i=>i.max!=null).length;
     const d=document.createElement("details");
     d.className="cat";
-    if (["hero","core","unknown"].includes(cat.id)) d.open=true;
+    if (["hero","core"].includes(cat.id)) d.open=true;
     d.innerHTML=`<summary>
         <span class="cat-name">${cat.label}</span>
         <span class="cat-count">${trackedCount ? `${maxedCount}/${trackedCount} maxed` : `${list.length} listed`}</span>
@@ -626,9 +622,8 @@ function runAnalyze() {
     if (!raw) throw new Error("Paste your Clash of Clans Data Export JSON first, then hit Analyze.");
     const result = analyze(raw);
     render(result);
-    const mapped = result.items.filter(i => i.cat !== "unknown").length;
-    const unknown = result.items.filter(i => i.cat === "unknown").length;
-    setStatus(`Analyzed TH${result.thLvl ?? "?"} · ${mapped} mapped IDs · ${unknown} unmapped IDs`);
+    const mapped = result.items.length;
+    setStatus(`Analyzed TH${result.thLvl ?? "?"} · ${mapped} tracked upgrade types`);
   } catch (e) {
     setError(e && e.message ? e.message : String(e));
     setStatus("Analysis failed — check the message above.");
@@ -662,7 +657,6 @@ function loadSample() {
     spells:[{data:26000002,lvl:6},{data:26000098,lvl:4},{data:26000070,lvl:4},{data:26000005,lvl:7}],
     pets:[{data:73000000,lvl:15},{data:73000010,lvl:10},{data:73000011,lvl:8},{data:73000016,lvl:9}],
     siege_machines:[{data:4000051,lvl:5},{data:4000092,lvl:5},{data:4000135,lvl:4}],
-    // fake unknown to demonstrate the new unmapped section
     guardians:[{data:107000000,lvl:1}]
   };
   app.jsonInput.value = JSON.stringify(sample, null, 2);
