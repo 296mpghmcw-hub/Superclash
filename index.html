@@ -298,7 +298,7 @@
   </section>
 
   <footer>
-    Version 12: photos are fully disabled, equipment detection is more aggressive, and you can manually add missing equipment rows when Clash's export does not expose them.
+    Version 13: photos are fully disabled, equipment detection is best-effort, and a full manual equipment checklist lets you fill anything Clash does not expose.
   </footer>
 </div>
 <script>
@@ -565,6 +565,40 @@ function loadManualEquipment(){
 }
 function saveManualEquipment(rows){
   localStorage.setItem("warRoomManualEquipment", JSON.stringify(Array.isArray(rows) ? rows : []));
+}
+
+function loadEquipmentLevelOverrides(){
+  try { return JSON.parse(localStorage.getItem("warRoomEquipmentLevels") || "{}"); }
+  catch(e){ return {}; }
+}
+function saveEquipmentLevelOverride(name, level){
+  const data=loadEquipmentLevelOverrides();
+  const key=normName(name);
+  if (level === "" || level === null || level === undefined){ delete data[key]; }
+  else data[key]=String(level);
+  localStorage.setItem("warRoomEquipmentLevels", JSON.stringify(data));
+}
+function uniqueEquipmentMetaRows(){
+  const seen=new Set(), rows=[];
+  for (const meta of Object.values(EQUIPMENT_META)){
+    const key=normName(meta.display);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    rows.push(meta);
+  }
+  rows.sort((a,b)=>{
+    const h=a.hero.localeCompare(b.hero);
+    if (h) return h;
+    const r=(a.rarity === b.rarity) ? 0 : (a.rarity === "Epic" ? 1 : -1);
+    if (r) return r;
+    return a.display.localeCompare(b.display);
+  });
+  return rows;
+}
+function clampEquipmentLevel(level, max){
+  const n=Math.floor(num(level));
+  if (!Number.isFinite(n)) return null;
+  return Math.max(1, Math.min(max || 18, n));
 }
 function normalizeManualEquipmentRow(row){
   const meta=getEquipmentMetaByName(row?.name);
@@ -1150,6 +1184,40 @@ function collectEquipment(json){
   for (const m of normalizedManual){
     if (!detectedNamed.has(normName(m.name))){
       found.push(m);
+      detectedNamed.add(normName(m.name));
+    }
+  }
+
+  // Full manual checklist overrides/fills levels when the export misses equipment.
+  // This is the reliable path because Clash's Data Export often gives only raw IDs,
+  // omits locked/new gear, or changes equipment field names.
+  const levelOverrides=loadEquipmentLevelOverrides();
+  const byKnownName=new Map();
+  for (const e of found){
+    const meta=getEquipmentMetaByName(e.name);
+    if (!meta) continue;
+    const key=normName(meta.display);
+    byKnownName.set(key,e);
+    if (levelOverrides[key] !== undefined){
+      const lv=clampEquipmentLevel(levelOverrides[key], meta.max);
+      if (lv != null){
+        e.level=lv; e.max=meta.max; e.rarity=meta.rarity; e.hero=meta.hero;
+        e.minRecommended=meta.min; e.minNote=meta.note; e.name=meta.display; e.manualLevel=true;
+      }
+    }
+  }
+  for (const meta of uniqueEquipmentMetaRows()){
+    const key=normName(meta.display);
+    if (byKnownName.has(key)) continue;
+    if (levelOverrides[key] !== undefined){
+      const lv=clampEquipmentLevel(levelOverrides[key], meta.max);
+      if (lv != null){
+        found.push({
+          id:null,name:meta.display,level:lv,max:meta.max,rarity:meta.rarity,hero:meta.hero,
+          path:"manual checklist",nameSource:"manual checklist",equipped:false,manual:true,manualLevel:true,
+          minRecommended:meta.min ?? null,minNote:meta.note || ""
+        });
+      }
     }
   }
 
@@ -1391,6 +1459,65 @@ function renderManualEquipmentManager(root,equipment){
   });
 }
 
+function renderEquipmentChecklist(root,equipment){
+  const box=root.querySelector("#equipmentChecklist");
+  if (!box) return;
+  const levels=loadEquipmentLevelOverrides();
+  const detected=new Map();
+  for (const e of (equipment||[])){
+    const meta=getEquipmentMetaByName(e.name);
+    if (meta) detected.set(normName(meta.display),e);
+  }
+  const byHero={};
+  for (const meta of uniqueEquipmentMetaRows()){
+    (byHero[meta.hero] ||= []).push(meta);
+  }
+  const heroBlocks=Object.entries(byHero).map(([hero,rows])=>{
+    const cards=rows.map(meta=>{
+      const key=normName(meta.display);
+      const detectedRow=detected.get(key);
+      const stored=levels[key];
+      const value = stored !== undefined ? stored : (detectedRow ? detectedRow.level : "");
+      const source = stored !== undefined ? "typed" : (detectedRow ? "detected" : "blank");
+      return `<div class="ore-input equipment-level-input">
+        <label>${esc(meta.display)}</label>
+        <input data-equipment-level="${esc(meta.display)}" type="number" inputmode="numeric" min="1" max="${meta.max}" step="1" value="${esc(value)}" placeholder="level">
+        <div class="ore-current-note">${esc(meta.rarity)} max ${meta.max}${detectedRow ? ` - export saw level ${detectedRow.level}` : ""}${source==="typed" ? " - manual level used" : ""}</div>
+      </div>`;
+    }).join("");
+    return `<details class="cat" ${hero==="Barbarian King"?"open":""}>
+      <summary><span class="cat-name">${esc(hero)}</span><span class="cat-count">${rows.length} equipment</span><span class="chev">▸</span></summary>
+      <div class="ore-inputs" style="padding:0 16px 15px">${cards}</div>
+    </details>`;
+  }).join("");
+  box.innerHTML=`
+    <details class="cat" open>
+      <summary><span class="cat-name">Full equipment checklist</span><span class="cat-count">manual backup</span><span class="chev">▸</span></summary>
+      <div style="padding:0 16px 15px">
+        <div class="notice" style="display:block">If gear is missing or only shows as an ID, type its level here. These typed levels override/fill the export and are used in the ore planner. Leave blank for gear you do not want counted yet.</div>
+        ${heroBlocks}
+      </div>
+    </details>`;
+  box.querySelectorAll("[data-equipment-level]").forEach(input=>{
+    const save=()=>{
+      const name=input.getAttribute("data-equipment-level");
+      const meta=getEquipmentMetaByName(name);
+      let val=String(input.value||"").trim();
+      if (val){
+        const lv=clampEquipmentLevel(val, meta?.max || 18);
+        val=String(lv);
+        input.value=val;
+      }
+      saveEquipmentLevelOverride(name,val);
+      const raw=document.getElementById("jsonInput")?.value?.trim();
+      if (raw) render(analyze(raw));
+      setStatus(val ? `Saved ${name} level ${val}` : `Cleared ${name}`);
+    };
+    input.addEventListener("change",save);
+    input.addEventListener("blur",()=>{ if (document.activeElement !== input) save(); });
+  });
+}
+
 function renderEquipmentTab(equipment, oreData){
   window.__warRoomCurrentEquipment = equipment || [];
   const summary=document.getElementById("equipmentSummary");
@@ -1410,7 +1537,7 @@ function renderEquipmentTab(equipment, oreData){
     starry: displayOreValue("starry", detectedOres.starry)
   };
   summary.innerHTML=`
-    <div class="notice" style="display:block"><span class="version-pill">Version 12</span> Photos are disabled in this file. Equipment is detected from equipment/gear fields plus raw 900000xx IDs, and you can manually add any missing gear below.</div>
+    <div class="notice" style="display:block"><span class="version-pill">Version 13</span> Photos are disabled. Clash export equipment detection is inconsistent, so use the full checklist below to type any levels that are missing.</div>
     <div class="stat-grid">
       <div class="stat-card"><div class="label">Equipment found</div><div class="big">${total}</div><div class="small">From equipment/gear fields in your JSON</div></div>
       <div class="stat-card"><div class="label">Maxed</div><div class="big">${maxed}/${total || 0}</div><div class="small">Common cap 18, Epic cap 27</div></div>
@@ -1428,7 +1555,7 @@ function renderEquipmentTab(equipment, oreData){
       <div class="ore-input"><label>Starry Ore current balance</label><input data-ore-input="starry" inputmode="numeric" type="number" min="0" step="1" value="${esc(oreValue.starry !== "" ? oreValue.starry : "")}" placeholder="0"><div class="ore-current-note">Tap this box and type how much Starry Ore you have. ${detectedOres.starry != null ? `Export detected: ${fmtOre(detectedOres.starry)}` : `Export did not include this ore.`}</div></div>
     </div>
     <div class="notice" style="display:block">Your export does not always include ore balances or equipment names. Type your ores here and choose names for equipment IDs once; both save in this browser.</div>
-    <div id="oreIncomeEstimator" class="equip-card" style="margin-top:14px"></div><div id="manualEquipmentManager" class="equip-card" style="margin-top:14px"></div>`;
+    <div id="oreIncomeEstimator" class="equip-card" style="margin-top:14px"></div><div id="equipmentChecklist" style="margin-top:14px"></div><div id="manualEquipmentManager" class="equip-card" style="margin-top:14px"></div>`;
   const saveTypedOres = () => {
     const manual={};
     summary.querySelectorAll("[data-ore-input]").forEach(input=>{
@@ -1444,11 +1571,12 @@ function renderEquipmentTab(equipment, oreData){
     input.addEventListener("change", () => { saveTypedOres(); setStatus("Saved ore values on this browser"); });
   });
   renderOreIncomeEstimator(summary,equipment);
+  renderEquipmentChecklist(summary,equipment);
   renderManualEquipmentManager(summary,equipment);
 
-  listEl.innerHTML=`<div class="rec-head"><h3>Your detected equipment</h3><div class="equip-meta">These are the actual equipment entries from your export. Pick a name for any ID-only row and the guide below will start matching it.</div></div>`;
+  listEl.innerHTML=`<div class="rec-head"><h3>Your detected equipment from the export</h3><div class="equip-meta">This section is best-effort only. If something is missing, type it in the full checklist above and it will still count in the ore planner.</div></div>`;
   if (!equipment.length){
-    listEl.innerHTML=`<div class="equip-card"><div class="equip-name">No equipment entries found</div><div class="equip-meta">Your export may not expose equipment, or it may use a new field name. Use the Missing equipment box above to add gear manually; it will still count in the ore planner.</div></div>`;
+    listEl.innerHTML=`<div class="equip-card"><div class="equip-name">No equipment entries found in the export</div><div class="equip-meta">That is okay. Use the full equipment checklist above to type your gear levels manually; the ore planner will use those levels.</div></div>`;
     return;
   }
   for (const eq of equipment){
