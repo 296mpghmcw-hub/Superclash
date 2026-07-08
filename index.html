@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Superclash Planner - Version 24</title>
+<title>Superclash Planner - Version 26</title>
 <style>
   :root {
     --bg:#080b12; --bg2:#0d1320; --card:#131a2a; --card2:#171f31; --line:rgba(148,163,184,.18);
@@ -62,13 +62,14 @@
 
   .guide-list{display:grid;gap:10px;margin-top:12px}.guide-card{border:1px solid var(--line);background:rgba(8,13,24,.46);border-radius:15px;padding:12px;display:grid;gap:8px}.guide-card-head{display:flex;justify-content:space-between;gap:10px;align-items:start}.guide-title{font-weight:950}.guide-type{color:var(--muted);font-size:12px}.guide-text{color:var(--muted);font-size:13px;white-space:pre-wrap;max-height:160px;overflow:auto;border-top:1px solid var(--line);padding-top:8px}.ai-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.ai-output{white-space:pre-wrap;line-height:1.55;color:#dbeafe;background:rgba(8,13,24,.64);border:1px solid var(--line);border-radius:15px;padding:14px;min-height:140px}.ai-output.empty{color:var(--muted)}.grounding-box{margin-top:10px;border:1px solid rgba(96,165,250,.28);background:rgba(37,99,235,.08);border-radius:14px;padding:12px;color:#bfdbfe;font-size:12px;line-height:1.45}.grounding-box a{color:#93c5fd}.grounding-box .title{font-weight:950;color:#dbeafe;margin-bottom:6px}.textarea-small{min-height:120px}.chat-box{display:grid;gap:10px}.chat-thread{display:grid;gap:10px;max-height:420px;overflow:auto;padding:6px;border:1px solid var(--line);border-radius:15px;background:rgba(8,13,24,.42)}.chat-msg{border:1px solid var(--line);border-radius:15px;padding:11px 12px;white-space:pre-wrap;line-height:1.5}.chat-msg.user{margin-left:28px;background:rgba(139,92,246,.16);border-color:rgba(139,92,246,.35)}.chat-msg.ai{margin-right:28px;background:rgba(15,23,42,.72)}.chat-name{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:950;margin-bottom:5px}.chat-input-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}@media(max-width:640px){.chat-input-row{grid-template-columns:1fr}.chat-input-row .btn{width:100%}}.guide-compose{display:grid;gap:10px}.guide-meta-grid{display:grid;grid-template-columns:1fr 180px;gap:10px}@media(max-width:640px){.guide-meta-grid{grid-template-columns:1fr}.ai-actions .btn{flex:1}}
   .strategy-preview{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.45;border:1px solid var(--line);background:rgba(8,13,24,.46);border-radius:14px;padding:12px}
+  .trusted-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}@media(max-width:640px){.trusted-grid{grid-template-columns:1fr}}.trusted-card{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--line);background:rgba(8,13,24,.46);border-radius:14px;padding:11px}.trusted-card input{width:auto;margin-top:2px;accent-color:var(--accent)}.trusted-card strong{display:block;color:var(--text);font-size:13px}.trusted-card span{display:block;color:var(--muted);font-size:12px;line-height:1.35;margin-top:2px}.advisor-layout{display:grid;gap:14px}.advisor-thread{min-height:220px}.advisor-input textarea{min-height:96px}.advisor-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.advisor-toolbar .btn{min-width:140px}
   @media(max-width:520px){.wrap{padding-left:12px;padding-right:12px}.topline{align-items:flex-start}.sub{display:none}.tabs{position:sticky}.auth-actions{width:100%}.auth-actions .btn{flex:1}.stat-grid{grid-template-columns:1fr}.item{grid-template-columns:auto 1fr}.item .pill{justify-self:start}.source-grid,.equip-grid{grid-template-columns:1fr}}
 
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="hero"><div class="topline"><div class="brand"><div class="logo">SC</div><div><h1>Superclash Planner</h1><p class="sub">A clean upgrade dashboard for village progress, manual equipment, ores, AI plans, cloud save, and supercharges.</p></div></div><div class="version">v24 AI chat plan</div></div></header>
+  <header class="hero"><div class="topline"><div class="brand"><div class="logo">SC</div><div><h1>Superclash Planner</h1><p class="sub">A clean upgrade dashboard for village progress, manual equipment, ores, AI advisor, cloud save, and supercharges.</p></div></div><div class="version">v26 unified AI advisor</div></div></header>
   <section class="card soft auth-card" id="authPanel">
     <div class="auth-left">
       <div class="auth-title"><span class="auth-dot" id="authDot"></span><span id="authTitle">Not signed in</span></div>
@@ -106,8 +107,8 @@
   <section class="panel" id="panel-equipment"><div class="card"><div class="section-title">Manual equipment levels</div><p class="section-sub">Type your current level for each equipment. Use <b>0</b> or leave blank for gear you do not own or do not want counted.</p><div class="row"><button class="btn secondary" id="clearGearBtn">Clear all equipment levels</button></div><div id="equipmentManualList"></div></div><div class="card"><div class="section-title">Current ores</div><p class="section-sub">Type how much ore you have right now. These save automatically on this browser.</p><div class="grid three"><label>Shiny Ore<input type="number" min="0" step="1" id="oreShiny" placeholder="type amount"></label><label>Glowy Ore<input type="number" min="0" step="1" id="oreGlowy" placeholder="type amount"></label><label>Starry Ore<input type="number" min="0" step="1" id="oreStarry" placeholder="type amount"></label></div></div><div class="card"><div class="section-title">Ore tracker sources</div><p class="section-sub">Monthly gain cards like Clashify. Edit the totals for each source and turn off anything you do not use.</p><div class="grid two"><label>Goal<select id="oreGoal"><option value="max">Max all entered equipment</option><option value="minimum">Recommended minimums first</option></select></label><div class="row" style="align-items:end"><button class="btn secondary" id="resetOreSourcesBtn" type="button">Reset source values</button></div></div><div id="oreSourceGrid" class="source-grid"></div></div><div class="card"><div class="section-title">Finish estimate</div><p class="section-sub">Uses your current ore balance, the source cards above, and the manual equipment levels.</p><div id="orePlannerResults"></div></div></section>
   <section class="panel" id="panel-ai">
     <div class="card">
-      <div class="section-title">AI Plan</div>
-      <p class="section-sub">Pick a strategy and generate a plan. It uses your village data, manual equipment levels, ores, supercharges, and trusted public sources. No guide setup needed.</p>
+      <div class="section-title">AI Advisor</div>
+      <p class="section-sub">Generate a plan, then talk through changes in the same place. It uses your village, manual equipment, ores, source preferences, selected strategy, and live public sources when available.</p>
       <div class="grid two">
         <label>Strategy
           <select id="strategySelect">
@@ -126,33 +127,35 @@
         </label>
       </div>
       <div id="strategyPreview" class="strategy-preview"></div>
-      <div class="notice">Sources: official Supercell for facts, Clash Ninja/Clashify for planner data, Wiki for basic item info, and YouTube/community sources only for strategy opinions.</div>
-      <div class="ai-actions">
+      <details class="card soft" style="margin-top:12px;margin-bottom:0">
+        <summary>Trusted source preferences <span class="mini">used by AI search</span></summary>
+        <div class="details-body">
+          <p class="section-sub" style="margin-bottom:8px">Keep the sources you trust turned on. Official sources are treated as facts; YouTube, Reddit, and community sources are treated as strategy opinions.</p>
+          <div id="trustedSourceGrid" class="trusted-grid"></div>
+        </div>
+      </details>
+      <div class="advisor-toolbar">
         <button class="btn" id="generateAiPlanBtn" type="button">Generate plan</button>
-        <button class="btn secondary" id="clearAiPlanBtn" type="button">Clear plan</button>
+        <button class="btn secondary" id="clearAiPlanBtn" type="button">Clear conversation</button>
       </div>
       <div id="aiStatus" class="notice" style="display:none"></div>
+      <div id="aiOutput" class="ai-output empty" style="display:none">Pick a strategy and click Generate plan.</div>
     </div>
-    <div class="card">
-      <div class="section-title">Plan output</div>
-      <div id="aiOutput" class="ai-output empty">Pick a strategy, make sure your equipment and ores are entered, then click Generate plan.</div>
+    <div class="card advisor-layout">
+      <div>
+        <div class="section-title">Plan + conversation</div>
+        <p class="section-sub">Ask follow-ups like “rush harder,” “ignore walls,” “I use Hydra,” or “make this a one-week plan.”</p>
+      </div>
+      <div id="aiChatThread" class="chat-thread advisor-thread"><div class="mini">No messages yet. Generate a plan or ask a question below.</div></div>
       <div id="groundingBox" class="grounding-box" style="display:none"></div>
-    </div>
-    <div class="card">
-      <div class="section-title">Talk to the AI</div>
-      <p class="section-sub">Ask follow-up questions or tell it to change the plan. Example: “I want to rush harder,” “ignore walls,” or “make this work for Hydra.”</p>
-      <div class="chat-box">
-        <div id="aiChatThread" class="chat-thread"><div class="mini">No messages yet. Generate a plan first, or ask a follow-up below.</div></div>
-        <div class="chat-input-row">
-          <label>Message to AI<textarea id="aiChatInput" class="textarea-small" placeholder="Tell the AI what you want to change..."></textarea></label>
-          <button class="btn" id="sendAiChatBtn" type="button">Send</button>
-        </div>
-        <div class="row"><button class="btn secondary" id="clearAiChatBtn" type="button">Clear chat</button></div>
+      <div class="chat-input-row advisor-input">
+        <label>Message to AI<textarea id="aiChatInput" class="textarea-small" placeholder="Tell the AI what you want to change..."></textarea></label>
+        <button class="btn" id="sendAiChatBtn" type="button">Send</button>
       </div>
     </div>
   </section>
   <section class="panel" id="panel-supercharges"><div class="card"><div class="section-title">Supercharges</div><p class="section-sub">Analyze your village first. This shows eligible max-level buildings and any charge levels exposed in the export. If the export does not expose charge fields, it assumes charge 0.</p><div id="superchargeResults" class="queue"></div></div></section>
-  <footer>Version 24. Cleaner layout, AI plan chat, cloud save, manual equipment, ores, AI strategies, and supercharges.</footer>
+  <footer>Version 26. Unified AI advisor, trusted source toggles, cloud save, manual equipment, ores, AI strategies, and supercharges.</footer>
 </div>
 <script>
 "use strict";
@@ -540,6 +543,19 @@ const STRATEGIES = {
 };
 function getPlannerStrategy(){const key=localStorage.getItem("scPlannerStrategy")||"balanced"; return STRATEGIES[key]?key:"balanced";}
 function getPlanLength(){const key=localStorage.getItem("scAiPlanLength")||"short"; return key==="detailed"?"detailed":"short";}
+const TRUSTED_SOURCE_DEFAULTS={official:true,tee:true,clashNinja:true,clashify:true,youtube:true,reddit:true,wiki:true};
+const TRUSTED_SOURCE_META={
+  official:{label:"Supercell official",desc:"Patch notes, official mechanics, update facts."},
+  tee:{label:"CallMeTee / Rush Bible",desc:"Preferred source for strategic rushing philosophy."},
+  clashNinja:{label:"Clash Ninja",desc:"Max levels, upgrade tracking, planning references."},
+  clashify:{label:"Clashify",desc:"Equipment, ore planning, tracker-style references."},
+  youtube:{label:"YouTube / creators",desc:"Meta opinions and practical strategy videos."},
+  reddit:{label:"Reddit / community",desc:"Community testing and discussion. Lower confidence."},
+  wiki:{label:"Clash Wiki",desc:"Basic item identity and mechanics, not priority advice."}
+};
+function loadTrustedSources(){try{return {...TRUSTED_SOURCE_DEFAULTS,...JSON.parse(localStorage.getItem("scTrustedSources")||"{}")};}catch(e){return {...TRUSTED_SOURCE_DEFAULTS};}}
+function saveTrustedSources(v){localStorage.setItem("scTrustedSources",JSON.stringify(v||{}));}
+function renderTrustedSources(){const root=$("trustedSourceGrid"); if(!root)return; const prefs=loadTrustedSources(); root.innerHTML=Object.keys(TRUSTED_SOURCE_META).map(k=>{const m=TRUSTED_SOURCE_META[k]; return `<label class="trusted-card"><input type="checkbox" data-trusted-source="${esc(k)}" ${prefs[k]!==false?"checked":""}><div><strong>${esc(m.label)}</strong><span>${esc(m.desc)}</span></div></label>`;}).join(""); root.querySelectorAll("[data-trusted-source]").forEach(chk=>chk.addEventListener("change",()=>{const cur=loadTrustedSources(); cur[chk.dataset.trustedSource]=chk.checked; saveTrustedSources(cur);}));}
 function renderStrategyControls(){
   const sel=$("strategySelect"), len=$("planLengthSelect"), prev=$("strategyPreview");
   if(sel){sel.value=getPlannerStrategy(); sel.onchange=()=>{localStorage.setItem("scPlannerStrategy",sel.value); renderStrategyControls();};}
@@ -550,7 +566,7 @@ function renderStrategyControls(){
 function buildAiOreNeedSummary(){const settings=loadOreSettings(); const goal=["max","minimum"].includes(settings.oreGoal)?settings.oreGoal:"max"; const ores=loadManualOres(); const monthly=calcMonthly(); const entered=gearRows().filter(r=>r.level>0); const total={shiny:0,glowy:0,starry:0}; const costs=[]; entered.forEach(eq=>{const target=goal==="minimum"?Math.min(eq.max,eq.min||eq.max):eq.max; if(eq.level>=target)return; const c=costBetween(eq.level,target,eq.rarity); addCost(total,c); costs.push({name:eq.display,hero:eq.hero,rarity:eq.rarity,level:eq.level,target,c});}); const needAfter={shiny:Math.max(0,total.shiny-num(ores.shiny)),glowy:Math.max(0,total.glowy-num(ores.glowy)),starry:Math.max(0,total.starry-num(ores.starry))}; const months={shiny:needAfter.shiny===0?0:(monthly.shiny?needAfter.shiny/monthly.shiny:null),glowy:needAfter.glowy===0?0:(monthly.glowy?needAfter.glowy/monthly.glowy:null),starry:needAfter.starry===0?0:(monthly.starry?needAfter.starry/monthly.starry:null)}; return {goal,currentOres:ores,monthlyGain:monthly,totalCost:total,neededAfterCurrent:needAfter,monthsByOre:months,costs:costs.slice(0,40)};}
 function getSuperclashAiContext(){let village=null; const raw=$("jsonInput")?.value.trim(); if(raw){try{const result=analyzeVillage(raw); const q=buildQueue(result.items).slice(0,8).map(i=>({name:i.name,category:i.cat,level:i.minLvl,max:i.max,below:i.below,total:i.total,why:i.why||""})); const timers=result.items.flatMap(i=>(i.timers||[]).map(t=>({name:i.name,level:t.lvl,count:t.cnt,remaining:formatDuration(t.seconds)}))).slice(0,20); village={townHall:result.thLvl,levelCompletionPercent: result.items.reduce((s,i)=>s+i.done,0) && result.items.reduce((s,i)=>s+i.cap,0) ? Math.round(result.items.reduce((s,i)=>s+i.done,0)/result.items.reduce((s,i)=>s+i.cap,0)*100) : null,topUpgradeFocus:q,activeTimers:timers,supercharges:(result.supercharges||[]).slice(0,20).map(s=>({name:s.name,kind:s.kind,eligible:s.eligible,lowestCharge:s.min,maxCharge:s.maxCharge}))};}catch(e){village={error:e.message};}}
   const sources=loadOreSources(); const enabledSources=Object.fromEntries(Object.entries(sources).filter(([k,v])=>v.enabled));
-  const strategyKey=getPlannerStrategy(); const planLength=getPlanLength(); return {generatedAt:new Date().toISOString(),strategy:{key:strategyKey,label:STRATEGIES[strategyKey].label,description:STRATEGIES[strategyKey].desc},planLength,village,manualEquipment:gearRows().filter(r=>r.level>0).map(r=>({name:r.display,hero:r.hero,rarity:r.rarity,level:r.level,max:r.max,recommendedMinimum:r.min})),ores:buildAiOreNeedSummary(),oreSourcesEnabled:enabledSources};}
+  const strategyKey=getPlannerStrategy(); const planLength=getPlanLength(); const trustedSources=loadTrustedSources(); return {generatedAt:new Date().toISOString(),strategy:{key:strategyKey,label:STRATEGIES[strategyKey].label,description:STRATEGIES[strategyKey].desc},planLength,trustedSources,village,manualEquipment:gearRows().filter(r=>r.level>0).map(r=>({name:r.display,hero:r.hero,rarity:r.rarity,level:r.level,max:r.max,recommendedMinimum:r.min})),ores:buildAiOreNeedSummary(),oreSourcesEnabled:enabledSources};}
 window.getSuperclashAiContext=getSuperclashAiContext;
 
 let lastVillageResult=null; function switchPanel(id){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.panel===id));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id===`panel-${id}`));}
@@ -558,9 +574,10 @@ document.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll(".ta
 
 document.addEventListener("DOMContentLoaded",()=>{
   renderStrategyControls();
+  renderTrustedSources();
   const savedPlan=localStorage.getItem("scLastAiPlan");
   if(savedPlan && $("aiOutput")){ $("aiOutput").classList.remove("empty"); $("aiOutput").textContent=savedPlan; }
-  $("clearAiPlanBtn")?.addEventListener("click",()=>{localStorage.removeItem("scLastAiPlan"); if($("aiOutput")){ $("aiOutput").classList.add("empty"); $("aiOutput").textContent="Plan cleared. Pick a strategy and click Generate plan when you are ready."; } const gb=$("groundingBox"); if(gb){gb.style.display="none"; gb.innerHTML="";} });
+  $("clearAiPlanBtn")?.addEventListener("click",()=>{localStorage.removeItem("scLastAiPlan"); localStorage.removeItem("scAiChat"); if($("aiOutput")){ $("aiOutput").classList.add("empty"); $("aiOutput").textContent="Plan cleared. Pick a strategy and click Generate plan when you are ready."; } const gb=$("groundingBox"); if(gb){gb.style.display="none"; gb.innerHTML="";} if(window.renderAiChat) window.renderAiChat(); });
 });
 </script>
 <script type="module">
@@ -597,14 +614,14 @@ try {
 let currentUser = null;
 
 const $id = (id) => document.getElementById(id);
-const SAVE_KEYS = ["warRoomLastExport", "scManualGearLevels", "scManualOres", "scOreSettings", "scOreSources", "scLastAiPlan", "scAiChat", "scPlannerStrategy", "scAiPlanLength"];
+const SAVE_KEYS = ["warRoomLastExport", "scManualGearLevels", "scManualOres", "scOreSettings", "scOreSources", "scLastAiPlan", "scAiChat", "scPlannerStrategy", "scAiPlanLength", "scTrustedSources"];
 
 function getLocalSavePayload(){
   const data = {};
   SAVE_KEYS.forEach(k => data[k] = localStorage.getItem(k) || "");
   const jsonInput = $id("jsonInput");
   if(jsonInput && jsonInput.value.trim()) data.warRoomLastExport = jsonInput.value.trim();
-  return { version: 24, updatedAt: serverTimestamp(), data };
+  return { version: 26, updatedAt: serverTimestamp(), data };
 }
 
 function applyCloudPayload(payload){
@@ -614,7 +631,7 @@ function applyCloudPayload(payload){
     if(typeof v === "string" && v.length) localStorage.setItem(k, v);
     else localStorage.removeItem(k);
   });
-  location.href = location.pathname + "?v=24-cloud-" + Date.now();
+  location.href = location.pathname + "?v=26-cloud-" + Date.now();
 }
 
 function userSaveRef(){
@@ -698,12 +715,15 @@ Length preference: ${lengthInstruction}
 Source rules:
 - Use the user's account data first: village export, equipment levels, ores, ore income sources, timers, and supercharges.
 - Use Google Search grounding for current public information when needed.
+- Respect the user's trusted source toggles in USER DATA JSON. If a source is turned off, avoid relying on it unless it is needed for a basic public fact and clearly say why.
+- If CallMeTee / Rush Bible is enabled and the strategy is Strategic rushing, specifically search for CallMeTee's Updated Rush Bible, CallMeTee's Strategic Rushing Bible, or Tee-style strategic rushing advice.
 - Source priority:
   1. Supercell official Clash of Clans patch notes/blog for game facts, release changes, and official mechanics.
   2. Clash Ninja and Clashify for max-level references, planning data, costs, timers, and progression context.
-  3. Clash of Clans Wiki for item identity and basic mechanics only.
-  4. YouTube guides, creator guides, Reddit discussions, and community articles for strategy/meta opinions only. Prefer recent, reputable, repeated advice.
-- If sources conflict, prefer official Supercell for facts, tracker sites for data, then community sources for strategy.
+  3. CallMeTee / rushing guides for strategic rushing philosophy when enabled.
+  4. Clash of Clans Wiki for item identity and basic mechanics only.
+  5. YouTube creator guides, Reddit discussions, and community articles for strategy/meta opinions only. Prefer recent, reputable, repeated advice.
+- If sources conflict, prefer official Supercell for facts, tracker sites for data, then creator/community sources for strategy.
 - Do not invent exact costs, timers, stats, or meta claims. If uncertain, say what still needs checking.
 
 Planning rules:
@@ -728,6 +748,12 @@ async function renderAiResult(result, usedWeb){
   localStorage.setItem("scLastAiPlan", text);
   if(out){out.classList.remove("empty"); out.textContent=text;}
   const meta = result?.response?.candidates?.[0]?.groundingMetadata;
+  try{
+    const chat = loadAiChat();
+    chat.push({role:"ai", text, kind:"plan", at:new Date().toISOString()});
+    saveAiChat(chat);
+    renderAiChat();
+  }catch(e){}
   if(gb){
     if(meta){
       const escHtml=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
@@ -760,14 +786,20 @@ function renderAiChat(){
   const thread=document.getElementById("aiChatThread");
   if(!thread) return;
   const messages=loadAiChat();
+  const escHtml=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
   if(!messages.length){
-    thread.innerHTML='<div class="mini">No messages yet. Generate a plan first, or ask a follow-up below.</div>';
+    const savedPlan=localStorage.getItem("scLastAiPlan")||"";
+    if(savedPlan){
+      thread.innerHTML=`<div class="chat-msg ai"><span class="chat-name">AI plan</span>${escHtml(savedPlan)}</div>`;
+    } else {
+      thread.innerHTML='<div class="mini">No messages yet. Generate a plan or ask a question below.</div>';
+    }
     return;
   }
-  const escHtml=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-  thread.innerHTML=messages.map(m=>`<div class="chat-msg ${m.role==='user'?'user':'ai'}"><span class="chat-name">${m.role==='user'?'You':'AI'}</span>${escHtml(m.text||'')}</div>`).join("");
+  thread.innerHTML=messages.map(m=>`<div class="chat-msg ${m.role==='user'?'user':'ai'}"><span class="chat-name">${m.role==='user'?'You':(m.kind==='plan'?'AI plan':'AI')}</span>${escHtml(m.text||'')}</div>`).join("");
   thread.scrollTop=thread.scrollHeight;
 }
+window.renderAiChat=renderAiChat;
 function buildChatPrompt(context, userMessage, chatHistory){
   const currentPlan = localStorage.getItem("scLastAiPlan") || "No generated plan yet.";
   const shortHistory = (chatHistory || []).slice(-10);
@@ -775,8 +807,9 @@ function buildChatPrompt(context, userMessage, chatHistory){
 
 Rules:
 - Be conversational but concise.
-- Use the user's account data and selected strategy.
+- Use the user's account data, selected strategy, and trusted source toggles.
 - Use Google Search grounding when useful for current Clash facts/meta.
+- If CallMeTee / Rush Bible is enabled and the topic is rushing, prefer Tee-style strategic rushing sources.
 - Treat YouTube/community sources as strategy opinions, not hard facts.
 - If the user asks to change the plan, update the recommendation clearly.
 - Do not invent exact data. If something is missing, say what you need.
