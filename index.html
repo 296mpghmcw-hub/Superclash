@@ -65,6 +65,13 @@
   .trusted-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}@media(max-width:640px){.trusted-grid{grid-template-columns:1fr}}.trusted-card{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--line);background:rgba(8,13,24,.46);border-radius:14px;padding:11px}.trusted-card input{width:auto;margin-top:2px;accent-color:var(--accent)}.trusted-card strong{display:block;color:var(--text);font-size:13px}.trusted-card span{display:block;color:var(--muted);font-size:12px;line-height:1.35;margin-top:2px}.advisor-layout{display:grid;gap:14px}.advisor-thread{min-height:220px}.advisor-input textarea{min-height:96px}.advisor-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.advisor-toolbar .btn{min-width:140px}
   @media(max-width:520px){.wrap{padding-left:12px;padding-right:12px}.topline{align-items:flex-start}.sub{display:none}.tabs{position:sticky}.auth-actions{width:100%}.auth-actions .btn{flex:1}.stat-grid{grid-template-columns:1fr}.item{grid-template-columns:auto 1fr}.item .pill{justify-self:start}.source-grid,.equip-grid{grid-template-columns:1fr}}
 
+  .inline-icon-label{display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px;font-weight:900;text-transform:none;letter-spacing:0;margin-bottom:4px}
+  .inline-icon-label .badge{width:28px;height:28px;border-radius:9px}
+  .ore-input-label{gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--muted)}
+  .equip-head-main,.equip-name-row{display:flex;align-items:center;gap:10px;min-width:0}
+  .equip-head-main h3{font-size:16px;margin:0}.equip-head-main .badge,.equip-name-row .badge{width:34px;height:34px;border-radius:10px}
+  .equip-name-row .equip-name,.equip-name-row .equip-meta{min-width:0}
+
 </style>
 </head>
 <body>
@@ -155,7 +162,7 @@
     </div>
   </section>
   <section class="panel" id="panel-supercharges"><div class="card"><div class="section-title">Supercharges</div><p class="section-sub">Analyze your village first. This shows eligible max-level buildings and any charge levels exposed in the export. If the export does not expose charge fields, it assumes charge 0.</p><div id="superchargeResults" class="queue"></div></div></section>
-  <footer>v1.26. Building images are enabled with automatic letter-badge fallback.</footer>
+  <footer>v1.26. Photos are enabled for buildings, heroes, troops, spells, pets, equipment, and ores with automatic fallback.</footer>
 </div>
 <script>
 "use strict";
@@ -500,7 +507,136 @@ const ITEM_IMAGE_FILES = {
   "Mega Mine":"Mega_Mine10.png",
   "Capital Hall":"Capital_Hall10.png",
   "District Hall":"District_Hall5.png",
-  "Ruins":"Ruins.png"
+  "Ruins":"Ruins.png",
+
+  // Heroes
+  "Barbarian King":"Barbarian_King.png",
+  "Archer Queen":"Archer_Queen.png",
+  "Grand Warden":"Grand_Warden.png",
+  "Royal Champion":"Royal_Champion.png",
+  "Minion Prince":"Minion_Prince.png",
+  "Dragon Duke":"Dragon_Duke.png",
+
+  // Home Village troops
+  "Root Rider":"Root_Rider.png",
+  "Druid":"Druid.png",
+  "Thrower":"Thrower.png",
+  "Electro Titan":"Electro_Titan.png",
+  "Yeti":"Yeti.png",
+  "Apprentice Warden":"Apprentice_Warden.png",
+  "Dragon Rider":"Dragon_Rider.png",
+  "Electro Dragon":"Electro_Dragon.png",
+  "Dragon":"Dragon.png",
+  "Baby Dragon":"Baby_Dragon.png",
+  "Wizard":"Wizard.png",
+  "Wall Breaker":"Wall_Breaker.png",
+  "Balloon":"Balloon.png",
+  "Healer":"Healer.png",
+  "Hog Rider":"Hog_Rider.png",
+  "Miner":"Miner.png",
+  "Bowler":"Bowler.png",
+  "Witch":"Witch.png",
+  "Valkyrie":"Valkyrie.png",
+  "Golem":"Golem.png",
+  "Lava Hound":"Lava_Hound.png",
+  "Ice Golem":"Ice_Golem.png",
+  "Headhunter":"Headhunter.png",
+  "Giant":"Giant.png",
+  "Barbarian":"Barbarian.png",
+  "Archer":"Archer.png",
+  "Goblin":"Goblin.png",
+  "Minion":"Minion.png",
+  "P.E.K.K.A":"P.E.K.K.A.png",
+  "Furnace":"Furnace.png",
+
+  // Spells
+  "Rage Spell":"Rage_Spell.png",
+  "Revive Spell":"Revive_Spell.png",
+  "Overgrowth Spell":"Overgrowth_Spell.png",
+  "Earthquake Spell":"Earthquake_Spell.png",
+  "Lightning Spell":"Lightning_Spell.png",
+  "Freeze Spell":"Freeze_Spell.png",
+  "Invisibility Spell":"Invisibility_Spell.png",
+  "Recall Spell":"Recall_Spell.png",
+  "Healing Spell":"Healing_Spell.png",
+  "Jump Spell":"Jump_Spell.png",
+  "Poison Spell":"Poison_Spell.png",
+  "Haste Spell":"Haste_Spell.png",
+  "Clone Spell":"Clone_Spell.png",
+  "Skeleton Spell":"Skeleton_Spell.png",
+  "Bat Spell":"Bat_Spell.png",
+  "Ice Block Spell":"Ice_Block_Spell.png",
+
+  // Siege Machines
+  "Wall Wrecker":"Wall_Wrecker.png",
+  "Battle Blimp":"Battle_Blimp.png",
+  "Stone Slammer":"Stone_Slammer.png",
+  "Siege Barracks":"Siege_Barracks.png",
+  "Log Launcher":"Log_Launcher.png",
+  "Flame Flinger":"Flame_Flinger.png",
+  "Battle Drill":"Battle_Drill.png",
+  "Troop Launcher":"Troop_Launcher.png",
+
+  // Pets
+  "L.A.S.S.I":"L.A.S.S.I.png",
+  "Electro Owl":"Electro_Owl.png",
+  "Mighty Yak":"Mighty_Yak.png",
+  "Unicorn":"Unicorn.png",
+  "Phoenix":"Phoenix.png",
+  "Poison Lizard":"Poison_Lizard.png",
+  "Diggy":"Diggy.png",
+  "Frosty":"Frosty.png",
+  "Spirit Fox":"Spirit_Fox.png",
+  "Angry Jelly":"Angry_Jelly.png",
+  "Sneezy":"Sneezy.png",
+
+  // Hero Equipment
+  "Barbarian Puppet":"Barbarian_Puppet.png",
+  "Rage Vial":"Rage_Vial.png",
+  "Earthquake Boots":"Earthquake_Boots.png",
+  "Vampstache":"Vampstache.png",
+  "Giant Gauntlet":"Giant_Gauntlet.png",
+  "Spiky Ball":"Spiky_Ball.png",
+  "Snake Bracelet":"Snake_Bracelet.png",
+  "Stick Horse":"Stick_Horse.png",
+  "Archer Puppet":"Archer_Puppet.png",
+  "Invisibility Vial":"Invisibility_Vial.png",
+  "Giant Arrow":"Giant_Arrow.png",
+  "Healer Puppet":"Healer_Puppet.png",
+  "Frozen Arrow":"Frozen_Arrow.png",
+  "Magic Mirror":"Magic_Mirror.png",
+  "Action Figure":"Action_Figure.png",
+  "Monolith Arrow":"Monolith_Arrow.png",
+  "Eternal Tome":"Eternal_Tome.png",
+  "Life Gem":"Life_Gem.png",
+  "Healing Tome":"Healing_Tome.png",
+  "Rage Gem":"Rage_Gem.png",
+  "Fireball":"Fireball.png",
+  "Lavaloon Puppet":"Lavaloon_Puppet.png",
+  "Heroic Torch":"Heroic_Torch.png",
+  "Royal Gem":"Royal_Gem.png",
+  "Seeking Shield":"Seeking_Shield.png",
+  "Hog Rider Puppet":"Hog_Rider_Puppet.png",
+  "Haste Vial":"Haste_Vial.png",
+  "Rocket Spear":"Rocket_Spear.png",
+  "Electro Boots":"Electro_Boots.png",
+  "Frost Flake":"Frost_Flake.png",
+  "Dark Orb":"Dark_Orb.png",
+  "Henchmen Puppet":"Henchmen_Puppet.png",
+  "Metal Pants":"Metal_Pants.png",
+  "Noble Iron":"Noble_Iron.png",
+  "Dark Crown":"Dark_Crown.png",
+  "Meteor Staff":"Meteor_Staff.png",
+  "Fire Heart":"Fire_Heart.png",
+  "Flame Blower":"Flame_Blower.png",
+  "Stun Blaster":"Stun_Blaster.png",
+  "Electro Fangs":"Electro_Fangs.png",
+  "Rocket Backpack":"Rocket_Backpack.png",
+
+  // Ores
+  "Shiny Ore":"Shiny_Ore.png",
+  "Glowy Ore":"Glowy_Ore.png",
+  "Starry Ore":"Starry_Ore.png"
 };
 function wikiImageUrl(file){return `https://clashofclans.fandom.com/wiki/Special:Redirect/file/${encodeURIComponent(file)}`;}
 function imageFileForItem(name){return ITEM_IMAGE_FILES[name] || null;}
@@ -511,6 +647,7 @@ function iconHtml(name){
   const src=wikiImageUrl(file);
   return `<div class="badge badge-img"><img src="${esc(src)}" alt="${esc(name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove();this.parentElement.classList.remove('badge-img');this.parentElement.textContent='${init}'"></div>`;
 }
+function inlineIconLabel(name,text=name){return `<span class="inline-icon-label">${iconHtml(name)}<span>${esc(text)}</span></span>`;}
 function normName(s){return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();}
 function getMaxForTH(info,th){if(!info)return null;if(info.maxByTh){return info.maxByTh[th] ?? info.maxByTh[String(th)] ?? info.maxByTh[18] ?? info.maxByTh[17] ?? null;}return info.max ?? null;}
 function setStatus(msg,bad=false){const el=$("status"); el.style.display="block"; el.className="notice"+(bad?" error":""); el.textContent=msg;}
@@ -593,7 +730,7 @@ function canonicalEquipment(){const map=new Map(); Object.entries(EQUIPMENT_META
 function loadGearLevels(){try{return JSON.parse(localStorage.getItem("scManualGearLevels")||"{}");}catch(e){return {};}}
 function saveGearLevels(levels){localStorage.setItem("scManualGearLevels",JSON.stringify(levels||{}));}
 function gearRows(){const levels=loadGearLevels(); return canonicalEquipment().map(m=>{const lvl=Math.max(0,Math.min(m.max,Math.floor(num(levels[m.key])))); return {...m,level:lvl};});}
-function renderEquipmentInputs(){const root=$("equipmentManualList"); root.innerHTML=""; const rows=gearRows(); const heroes=[...new Set(rows.map(r=>r.hero))]; heroes.forEach(hero=>{const group=rows.filter(r=>r.hero===hero); const filled=group.filter(r=>r.level>0).length; const wrap=document.createElement("div");wrap.className="equip-hero";wrap.innerHTML=`<div class="equip-head"><h3>${esc(hero)}</h3><span class="equip-count">${filled}/${group.length} entered</span></div><div class="equip-grid"></div>`; const grid=wrap.querySelector(".equip-grid"); group.forEach(eq=>{const card=document.createElement("div");card.className="equip-card";card.innerHTML=`<div class="equip-top"><div><div class="equip-name">${esc(eq.display)}</div><div class="equip-meta">${eq.rarity} - cap ${eq.max} - recommended ${eq.min}+</div></div><span class="pill ${eq.rarity==='Epic'?'gold':''}">${eq.rarity}</span></div><div class="lvl-input"><label style="display:block;text-transform:none;letter-spacing:0;color:var(--muted);font-size:13px;font-weight:800">Current level</label><input type="number" min="0" max="${eq.max}" step="1" value="${eq.level||''}" placeholder="0" data-gear-level="${esc(eq.key)}"></div><div class="bar"><i class="${eq.level>=eq.max?'full':''}" style="width:${eq.level?Math.round(eq.level/eq.max*100):0}%"></i></div>`;grid.appendChild(card);}); root.appendChild(wrap);}); root.querySelectorAll("[data-gear-level]").forEach(inp=>inp.addEventListener("input",()=>{const levels=loadGearLevels(); const key=inp.dataset.gearLevel; const meta=canonicalEquipment().find(e=>e.key===key); const max=meta?.max||27; const v=Math.max(0,Math.min(max,Math.floor(num(inp.value)))); if(v>0) levels[key]=v; else delete levels[key]; saveGearLevels(levels); renderEquipmentInputs(); renderOrePlanner();}));}
+function renderEquipmentInputs(){const root=$("equipmentManualList"); root.innerHTML=""; const rows=gearRows(); const heroes=[...new Set(rows.map(r=>r.hero))]; heroes.forEach(hero=>{const group=rows.filter(r=>r.hero===hero); const filled=group.filter(r=>r.level>0).length; const wrap=document.createElement("div");wrap.className="equip-hero";wrap.innerHTML=`<div class="equip-head"><div class="equip-head-main">${iconHtml(hero)}<div><h3>${esc(hero)}</h3><div class="mini">${filled}/${group.length} entered</div></div></div><span class="equip-count">manual levels</span></div><div class="equip-grid"></div>`; const grid=wrap.querySelector(".equip-grid"); group.forEach(eq=>{const card=document.createElement("div");card.className="equip-card";card.innerHTML=`<div class="equip-top"><div class="equip-name-row">${iconHtml(eq.display)}<div><div class="equip-name">${esc(eq.display)}</div><div class="equip-meta">${eq.rarity} - cap ${eq.max} - recommended ${eq.min}+</div></div></div><span class="pill ${eq.rarity==='Epic'?'gold':''}">${eq.rarity}</span></div><div class="lvl-input"><label style="display:block;text-transform:none;letter-spacing:0;color:var(--muted);font-size:13px;font-weight:800">Current level</label><input type="number" min="0" max="${eq.max}" step="1" value="${eq.level||''}" placeholder="0" data-gear-level="${esc(eq.key)}"></div><div class="bar"><i class="${eq.level>=eq.max?'full':''}" style="width:${eq.level?Math.round(eq.level/eq.max*100):0}%"></i></div></div>`;grid.appendChild(card);}); root.appendChild(wrap);}); root.querySelectorAll("[data-gear-level]").forEach(inp=>inp.addEventListener("input",()=>{const levels=loadGearLevels(); const key=inp.dataset.gearLevel; const meta=canonicalEquipment().find(e=>e.key===key); const max=meta?.max||27; const v=Math.max(0,Math.min(max,Math.floor(num(inp.value)))); if(v>0) levels[key]=v; else delete levels[key]; saveGearLevels(levels); renderEquipmentInputs(); renderOrePlanner();})); decorateOreInputs();}
 function loadManualOres(){try{return JSON.parse(localStorage.getItem("scManualOres")||"{}");}catch(e){return {};}}
 function saveManualOres(o){localStorage.setItem("scManualOres",JSON.stringify(o||{}));}
 function loadOreSettings(){try{return {...DEFAULT_ORE_SETTINGS,...JSON.parse(localStorage.getItem("scOreSettings")||"{}")};}catch(e){return {...DEFAULT_ORE_SETTINGS};}}
@@ -654,7 +791,7 @@ function getSuperclashAiContext(){let village=null; const raw=$("jsonInput")?.va
 window.getSuperclashAiContext=getSuperclashAiContext;
 
 let lastVillageResult=null; function switchPanel(id){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.panel===id));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id===`panel-${id}`));}
-document.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchPanel(b.dataset.panel))); const last=localStorage.getItem("warRoomLastExport"); if(last) $("jsonInput").value=last; $("analyzeBtn").addEventListener("click",()=>{try{renderVillage(analyzeVillage($("jsonInput").value.trim()));}catch(e){setStatus(e.message,true);}}); $("sampleBtn").addEventListener("click",()=>{$("jsonInput").value=JSON.stringify({tag:"#SAMPLE",buildings:[{data:1000001,lvl:18},{data:1000071,lvl:12},{data:1000007,lvl:15},{data:1000000,lvl:13,cnt:4},{data:1000012,lvl:16,cnt:4,supercharge:1}],heroes:[{data:28000000,lvl:97},{data:28000001,lvl:97},{data:28000002,lvl:70},{data:28000004,lvl:45},{data:28000006,lvl:80}],units:[{data:4000008,lvl:12}],spells:[{data:26000002,lvl:6}],pets:[{data:73000010,lvl:10}]},null,2); renderVillage(analyzeVillage($("jsonInput").value));}); renderEquipmentInputs(); renderOreControls(); renderOrePlanner(); renderSupercharges([]); $("clearGearBtn").addEventListener("click",()=>{if(confirm("Clear all manually entered equipment levels?")){saveGearLevels({});renderEquipmentInputs();renderOrePlanner();}}); if(last){try{renderVillage(analyzeVillage(last));}catch(e){}}});
+document.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchPanel(b.dataset.panel))); const last=localStorage.getItem("warRoomLastExport"); if(last) $("jsonInput").value=last; $("analyzeBtn").addEventListener("click",()=>{try{renderVillage(analyzeVillage($("jsonInput").value.trim()));}catch(e){setStatus(e.message,true);}}); $("sampleBtn").addEventListener("click",()=>{$("jsonInput").value=JSON.stringify({tag:"#SAMPLE",buildings:[{data:1000001,lvl:18},{data:1000071,lvl:12},{data:1000007,lvl:15},{data:1000000,lvl:13,cnt:4},{data:1000012,lvl:16,cnt:4,supercharge:1}],heroes:[{data:28000000,lvl:97},{data:28000001,lvl:97},{data:28000002,lvl:70},{data:28000004,lvl:45},{data:28000006,lvl:80}],units:[{data:4000008,lvl:12}],spells:[{data:26000002,lvl:6}],pets:[{data:73000010,lvl:10}]},null,2); renderVillage(analyzeVillage($("jsonInput").value));}); renderEquipmentInputs(); renderOreControls(); decorateOreInputs(); renderOrePlanner(); renderSupercharges([]); $("clearGearBtn").addEventListener("click",()=>{if(confirm("Clear all manually entered equipment levels?")){saveGearLevels({});renderEquipmentInputs();renderOrePlanner();}}); if(last){try{renderVillage(analyzeVillage(last));}catch(e){}}});
 
 document.addEventListener("DOMContentLoaded",()=>{
   renderStrategyControls();
