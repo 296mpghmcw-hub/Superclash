@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Superclash Planner - Version 26</title>
+<title>Superclash Planner - v1.26</title>
 <style>
   :root {
     --bg:#080b12; --bg2:#0d1320; --card:#131a2a; --card2:#171f31; --line:rgba(148,163,184,.18);
@@ -36,7 +36,7 @@
   .notice{border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.10);color:#fde68a;border-radius:14px;padding:12px 14px;font-size:14px;margin:10px 0}.error{border-color:rgba(251,113,133,.45);background:rgba(251,113,133,.12);color:#fecdd3}
   .stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}@media(max-width:850px){.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.stat-grid{grid-template-columns:1fr}}
   .stat{background:rgba(9,13,23,.58);border:1px solid var(--line);border-radius:16px;padding:14px}.stat .label{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-weight:900}.stat .value{font-size:27px;font-weight:950;letter-spacing:-.04em;margin-top:4px}.stat .hint{color:var(--muted);font-size:12px;margin-top:3px}
-  .item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);background:rgba(9,13,23,.42);border-radius:16px;padding:12px}.badge{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-weight:950;background:linear-gradient(135deg,rgba(139,92,246,.38),rgba(56,189,248,.18));border:1px solid rgba(148,163,184,.2)}.item-title{font-weight:900}.item-meta{font-size:12px;color:var(--muted);font-family:"SFMono-Regular",Consolas,monospace;margin-top:2px}
+  .item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);background:rgba(9,13,23,.42);border-radius:16px;padding:12px}.badge{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-weight:950;background:linear-gradient(135deg,rgba(139,92,246,.38),rgba(56,189,248,.18));border:1px solid rgba(148,163,184,.2);overflow:hidden;flex:none}.badge.badge-img{background:rgba(255,255,255,.06)}.badge.badge-img img{width:100%;height:100%;object-fit:contain;padding:3px;display:block}.item-title{font-weight:900}.item-meta{font-size:12px;color:var(--muted);font-family:"SFMono-Regular",Consolas,monospace;margin-top:2px}
   .bar{grid-column:1/-1;height:9px;border-radius:999px;background:#0a0f1b;border:1px solid var(--line);overflow:hidden}.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#38bdf8,#c084fc)}.bar i.full{background:linear-gradient(90deg,#22c55e,#84cc16)}
   details{border:1px solid var(--line);border-radius:16px;background:rgba(19,26,42,.58);margin:10px 0;overflow:hidden}summary{cursor:pointer;padding:13px 14px;font-weight:900;display:flex;justify-content:space-between;gap:8px;list-style:none}summary::-webkit-details-marker{display:none}.details-body{padding:0 14px 14px}.queue{display:grid;gap:10px;margin-top:12px}.rank{font-size:22px;font-weight:950;color:#c4b5fd}
   .equip-hero{margin-top:18px}.equip-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.equip-count{font-size:12px;color:var(--muted);font-weight:800}.equip-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}@media(max-width:760px){.equip-grid{grid-template-columns:1fr}}.equip-card{border:1px solid var(--line);background:rgba(9,13,23,.38);border-radius:16px;padding:12px;display:grid;gap:10px}.equip-top{display:flex;align-items:start;justify-content:space-between;gap:10px}.equip-name{font-weight:900}.equip-meta{color:var(--muted);font-size:12px}.lvl-input{display:flex;align-items:center;gap:8px}.lvl-input input{max-width:90px;text-align:center;font-weight:900}
@@ -69,7 +69,7 @@
 </head>
 <body>
 <div class="wrap">
-  <header class="hero"><div class="topline"><div class="brand"><div class="logo">SC</div><div><h1>Superclash Planner</h1><p class="sub">A clean upgrade dashboard for village progress, manual equipment, ores, AI advisor, cloud save, and supercharges.</p></div></div><div class="version">v26 unified AI advisor</div></div></header>
+  <header class="hero"><div class="topline"><div class="brand"><div class="logo">SC</div><div><h1>Superclash Planner</h1><p class="sub">A clean upgrade dashboard for village progress, manual equipment, ores, AI advisor, cloud save, and supercharges.</p></div></div><div class="version">v1.26</div></div></header>
   <section class="card soft auth-card" id="authPanel">
     <div class="auth-left">
       <div class="auth-title"><span class="auth-dot" id="authDot"></span><span id="authTitle">Not signed in</span></div>
@@ -155,7 +155,7 @@
     </div>
   </section>
   <section class="panel" id="panel-supercharges"><div class="card"><div class="section-title">Supercharges</div><p class="section-sub">Analyze your village first. This shows eligible max-level buildings and any charge levels exposed in the export. If the export does not expose charge fields, it assumes charge 0.</p><div id="superchargeResults" class="queue"></div></div></section>
-  <footer>Version 26. Unified AI advisor, trusted source toggles, cloud save, manual equipment, ores, AI strategies, and supercharges.</footer>
+  <footer>v1.26. Building images are enabled with automatic letter-badge fallback.</footer>
 </div>
 <script>
 "use strict";
@@ -427,6 +427,90 @@ function esc(s){return String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"
 function num(v){const n=Number(String(v ?? "").replace(/,/g,""));return Number.isFinite(n)?n:0;}
 function fmt(n){return Math.round(num(n)).toLocaleString();}
 function initials(name){const words=String(name||"?").replace(/[^A-Za-z0-9 ]/g," ").trim().split(/\s+/).filter(Boolean);return (words.length?words.slice(0,2).map(w=>w[0]).join(""):"?").toUpperCase();}
+
+const ITEM_IMAGE_FILES = {
+  // Home Village - resource/core buildings
+  "Town Hall":"Town_Hall18.png",
+  "Gold Mine":"Gold_Mine17.png",
+  "Elixir Collector":"Elixir_Collector17.png",
+  "Gold Storage":"Gold_Storage19.png",
+  "Elixir Storage":"Elixir_Storage19.png",
+  "Dark Elixir Drill":"Dark_Elixir_Drill11.png",
+  "Dark Elixir Storage":"Dark_Elixir_Storage13.png",
+  "Clan Castle":"Clan_Castle14.png",
+
+  // Home Village - army buildings
+  "Army Camp":"Army_Camp14.png",
+  "Barracks":"Barracks19.png",
+  "Dark Barracks":"Dark_Barracks12.png",
+  "Laboratory":"Laboratory16.png",
+  "Spell Factory":"Spell_Factory9.png",
+  "Hero Hall":"Hero_Hall12.png",
+  "Hero Banner":"Hero_Banner_Empty.png",
+  "Dark Spell Factory":"Dark_Spell_Factory6.png",
+  "Blacksmith":"Blacksmith9.png",
+  "Workshop":"Workshop9.png",
+  "Pet House":"Pet_House12.png",
+
+  // Home Village - defenses and walls
+  "Cannon":"Cannon21B.png",
+  "Archer Tower":"Archer_Tower21.png",
+  "Mortar":"Mortar18B.png",
+  "Air Defense":"Air_Defense16.png",
+  "Wizard Tower":"Wizard_Tower17.png",
+  "Air Sweeper":"Air_Sweeper7.png",
+  "Hidden Tesla":"Hidden_Tesla17.png",
+  "Bomb Tower":"Bomb_Tower13.png",
+  "X-Bow":"X-Bow13_Ground.png",
+  "Inferno Tower":"Inferno_Tower12_Single.png",
+  "Eagle Artillery":"Eagle_Artillery7.png",
+  "Scattershot":"Scattershot7.png",
+  "Builder's Hut":"Builders_Hut8_Active.png",
+  "Spell Tower":"Spell_Tower4_Rage.png",
+  "Monolith":"Monolith5.png",
+  "Multi-Archer Tower":"Multi-Archer_Tower4.png",
+  "Ricochet Cannon":"Ricochet_Cannon4.png",
+  "Multi-Gear Tower":"Multi-Gear_Tower3_LongRange.png",
+  "Firespitter":"Firespitter3.png",
+  "Revenge Tower":"Revenge_Tower2_Stage3.png",
+  "Super Wizard Tower":"Super_Wizard_Tower2.png",
+  "Inferno Artillery / Crafted Defense":"Inferno_Artillery5.png",
+  "Wall":"Wall19.png",
+
+  // Traps. These file names follow the same Wiki/Fandom naming pattern; rows fall back cleanly if a file is unavailable.
+  "Bomb":"Bomb13.png",
+  "Spring Trap":"Spring_Trap13.png",
+  "Giant Bomb":"Giant_Bomb12.png",
+  "Air Bomb":"Air_Bomb13.png",
+  "Seeking Air Mine":"Seeking_Air_Mine8.png",
+  "Skeleton Trap":"Skeleton_Trap5.png",
+  "Tornado Trap":"Tornado_Trap3.png",
+  "Giga Bomb":"Giga_Bomb4.png",
+
+  // Builder Base / Clan Capital names from the supplied building pages, kept here for future expansion.
+  "Double Cannon":"Double_Cannon10.png",
+  "Archer Tower Builder Base":"Archer_Tower10.png",
+  "Crusher":"Crusher10.png",
+  "Guard Post":"Guard_Post10.png",
+  "Air Bombs":"Air_Bombs10.png",
+  "Roaster":"Roaster10.png",
+  "Giant Cannon":"Giant_Cannon10.png",
+  "Mega Tesla":"Mega_Tesla10.png",
+  "Lava Launcher":"Lava_Launcher10.png",
+  "Mega Mine":"Mega_Mine10.png",
+  "Capital Hall":"Capital_Hall10.png",
+  "District Hall":"District_Hall5.png",
+  "Ruins":"Ruins.png"
+};
+function wikiImageUrl(file){return `https://clashofclans.fandom.com/wiki/Special:Redirect/file/${encodeURIComponent(file)}`;}
+function imageFileForItem(name){return ITEM_IMAGE_FILES[name] || null;}
+function iconHtml(name){
+  const init=esc(initials(name));
+  const file=imageFileForItem(name);
+  if(!file) return `<div class="badge">${init}</div>`;
+  const src=wikiImageUrl(file);
+  return `<div class="badge badge-img"><img src="${esc(src)}" alt="${esc(name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove();this.parentElement.classList.remove('badge-img');this.parentElement.textContent='${init}'"></div>`;
+}
 function normName(s){return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();}
 function getMaxForTH(info,th){if(!info)return null;if(info.maxByTh){return info.maxByTh[th] ?? info.maxByTh[String(th)] ?? info.maxByTh[18] ?? info.maxByTh[17] ?? null;}return info.max ?? null;}
 function setStatus(msg,bad=false){const el=$("status"); el.style.display="block"; el.className="notice"+(bad?" error":""); el.textContent=msg;}
@@ -494,7 +578,7 @@ function renderVillage(result){
       div.className="item";
       const full=it.max!=null&&it.below===0;
       const itemPct=it.cap?Math.round(it.done/it.cap*100):100;
-      div.innerHTML=`<div class="badge">${initials(it.name)}</div><div><div class="item-title">${esc(it.name)}${it.upgrading?" <span class='mini'>timer</span>":""}</div><div class="item-meta">${it.max!=null?(it.total>1?(full?`all ${it.total} maxed (${it.max})`:`${it.below}/${it.total} to go · low ${it.minLvl}/${it.max}`):(full?`maxed ${it.max}`:`${it.minLvl}/${it.max}`)):`level ${it.maxLvlSeen}`}</div></div><span class="pill ${full?'green':''}">${full?'done':'todo'}</span><div class="bar"><i class="${full?'full':''}" style="width:${itemPct}%"></i></div>`;
+      div.innerHTML=`${iconHtml(it.name)}<div><div class="item-title">${esc(it.name)}${it.upgrading?" <span class='mini'>timer</span>":""}</div><div class="item-meta">${it.max!=null?(it.total>1?(full?`all ${it.total} maxed (${it.max})`:`${it.below}/${it.total} to go · low ${it.minLvl}/${it.max}`):(full?`maxed ${it.max}`:`${it.minLvl}/${it.max}`)):`level ${it.maxLvlSeen}`}</div></div><span class="pill ${full?'green':''}">${full?'done':'todo'}</span><div class="bar"><i class="${full?'full':''}" style="width:${itemPct}%"></i></div>`;
       body.appendChild(div);
     });
     catEl.appendChild(details);
@@ -504,7 +588,7 @@ function renderVillage(result){
 }
 function extractChargeLevel(raw){ if(!raw||typeof raw!=="object") return 0; for(const k of ["supercharge","super_charge","superCharge","charge","charge_lvl","chargeLevel","supercharge_lvl","superchargeLevel","boost_lvl","boostLevel"]){const n=Number(raw[k]); if(Number.isFinite(n)) return Math.max(0,n);} return 0; }
 function analyzeSupercharges(byId,thLvl){const rows=[]; for(const [id,sc] of Object.entries(SUPERCHARGE_INFO)){const list=byId.get(Number(id))||[]; if(!list.length)continue; const info=ITEMS[id]; const standardMax=getMaxForTH(info,thLvl); let eligible=0,total=0,done=0,cap=0,min=Infinity,upgrading=0; for(const e of list){const c=e.cnt||1; total+=c; if(e.timer!=null)upgrading+=c; if(standardMax==null||e.lvl>=standardMax){eligible+=c;const ch=Math.min(extractChargeLevel(e.raw),sc.maxCharge);min=Math.min(min,ch);done+=ch*c;cap+=sc.maxCharge*c;}} if(eligible>0)rows.push({id:Number(id),...sc,total,eligible,done,cap,min:min===Infinity?0:min,upgrading});} return rows.sort((a,b)=>(a.cap?a.done/a.cap:1)-(b.cap?b.done/b.cap:1)||a.name.localeCompare(b.name));}
-function renderSupercharges(rows){const el=$("superchargeResults"); el.innerHTML=""; if(!rows||!rows.length){el.innerHTML='<div class="notice">No eligible supercharges found yet. Analyze your village after you paste your export.</div>';return;} const done=rows.reduce((s,r)=>s+r.done,0),cap=rows.reduce((s,r)=>s+r.cap,0),pct=cap?Math.round(done/cap*100):0; el.innerHTML=`<div class="stat-grid"><div class="stat"><div class="label">Eligible types</div><div class="value">${rows.length}</div><div class="hint">Max-level buildings</div></div><div class="stat"><div class="label">Charge progress</div><div class="value">${pct}%</div><div class="hint">Assumes 0 if missing</div></div></div>`; rows.forEach(r=>{const div=document.createElement("div");div.className="item";const full=r.cap&&r.done>=r.cap;div.innerHTML=`<div class="badge">${initials(r.name)}</div><div><div class="item-title">${esc(r.name)}</div><div class="item-meta">${r.kind} - ${r.eligible} eligible - lowest charge ${r.min}/${r.maxCharge}</div></div><span class="pill ${full?'green':'gold'}">${full?'done':'charge'}</span><div class="bar"><i class="${full?'full':''}" style="width:${r.cap?Math.round(r.done/r.cap*100):0}%"></i></div>`;el.appendChild(div);});}
+function renderSupercharges(rows){const el=$("superchargeResults"); el.innerHTML=""; if(!rows||!rows.length){el.innerHTML='<div class="notice">No eligible supercharges found yet. Analyze your village after you paste your export.</div>';return;} const done=rows.reduce((s,r)=>s+r.done,0),cap=rows.reduce((s,r)=>s+r.cap,0),pct=cap?Math.round(done/cap*100):0; el.innerHTML=`<div class="stat-grid"><div class="stat"><div class="label">Eligible types</div><div class="value">${rows.length}</div><div class="hint">Max-level buildings</div></div><div class="stat"><div class="label">Charge progress</div><div class="value">${pct}%</div><div class="hint">Assumes 0 if missing</div></div></div>`; rows.forEach(r=>{const div=document.createElement("div");div.className="item";const full=r.cap&&r.done>=r.cap;div.innerHTML=`${iconHtml(r.name)}<div><div class="item-title">${esc(r.name)}</div><div class="item-meta">${r.kind} - ${r.eligible} eligible - lowest charge ${r.min}/${r.maxCharge}</div></div><span class="pill ${full?'green':'gold'}">${full?'done':'charge'}</span><div class="bar"><i class="${full?'full':''}" style="width:${r.cap?Math.round(r.done/r.cap*100):0}%"></i></div>`;el.appendChild(div);});}
 function canonicalEquipment(){const map=new Map(); Object.entries(EQUIPMENT_META).forEach(([key,m])=>{if(!m.display)return; const display=normName(m.display); if(map.has(display))return; map.set(display,{key:display,...m});}); const order=["Barbarian King","Archer Queen","Grand Warden","Royal Champion","Minion Prince","Dragon Duke"]; return [...map.values()].sort((a,b)=>(order.indexOf(a.hero)<0?99:order.indexOf(a.hero))-(order.indexOf(b.hero)<0?99:order.indexOf(b.hero)) || (a.rarity==="Epic"?1:0)-(b.rarity==="Epic"?1:0) || a.display.localeCompare(b.display));}
 function loadGearLevels(){try{return JSON.parse(localStorage.getItem("scManualGearLevels")||"{}");}catch(e){return {};}}
 function saveGearLevels(levels){localStorage.setItem("scManualGearLevels",JSON.stringify(levels||{}));}
@@ -621,7 +705,7 @@ function getLocalSavePayload(){
   SAVE_KEYS.forEach(k => data[k] = localStorage.getItem(k) || "");
   const jsonInput = $id("jsonInput");
   if(jsonInput && jsonInput.value.trim()) data.warRoomLastExport = jsonInput.value.trim();
-  return { version: 26, updatedAt: serverTimestamp(), data };
+  return { version: "1.26", updatedAt: serverTimestamp(), data };
 }
 
 function applyCloudPayload(payload){
